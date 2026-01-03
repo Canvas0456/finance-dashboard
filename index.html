@@ -123,7 +123,7 @@ h1 {
 const SHEET_ID =
 "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
 function fetchSheet(sheetName, callback) {
-  const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
   const query = new google.visualization.Query(url);
   query.setQuery("select *");
   query.send(res => {
