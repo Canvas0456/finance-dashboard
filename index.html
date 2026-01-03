@@ -5,7 +5,7 @@
 <title>Kaiwalya – Finance Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Visualization API -->
+<!-- Google Charts Loader -->
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
 google.charts.load("current", { packages:["table"] });
@@ -25,7 +25,7 @@ body {
 }
 h1 {
   font-size: 22px;
-  margin: 8px 0 16px;
+  margin: 10px 0 16px;
 }
 .section-title {
   margin-top: 28px;
@@ -103,18 +103,22 @@ h1 {
 </div>
 
 <script>
-// ===== GOOGLE SHEET ID (PUBLISHED) =====
+// ================= CONFIG =================
 const SHEET_ID =
 "2PACX-1vRLH-y2NpSvaDb6aVZQweoO2Bymd-PIN6EiPblnuUmIFqBkoqIu2p8UXW6uMb_TCZbLKIIBXHpHP3La";
 
-// ===== GENERIC SHEET FETCHER =====
+// =============== CORE FETCHER ===============
 function fetchSheet(sheetName, callback) {
-  const query = new google.visualization.Query(
-    `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?sheet=${sheetName}`
-  );
+  const url =
+    `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+  const query = new google.visualization.Query(url);
+
+  // 🔑 CRITICAL FIX
+  query.setQuery("select *");
+
   query.send(response => {
     if (response.isError()) {
-      console.error("Error loading " + sheetName);
+      console.error("Error loading:", sheetName);
       return;
     }
     const data = response.getDataTable();
@@ -130,10 +134,10 @@ function fetchSheet(sheetName, callback) {
   });
 }
 
-// ===== LOAD EVERYTHING AFTER GOOGLE API =====
+// =============== LOAD DATA =================
 google.charts.setOnLoadCallback(() => {
 
-  // KPIs
+  // ===== KPIs =====
   fetchSheet("Dashboard_KPIs", rows => {
     const box = document.getElementById("kpis");
     rows.forEach(r => {
@@ -145,7 +149,7 @@ google.charts.setOnLoadCallback(() => {
     });
   });
 
-  // Budgets
+  // ===== BUDGETS =====
   fetchSheet("Budgets_vs_Actuals", rows => {
     const el = document.getElementById("budget");
     rows.forEach(r => {
@@ -161,7 +165,7 @@ google.charts.setOnLoadCallback(() => {
     });
   });
 
-  // EMI
+  // ===== EMI =====
   fetchSheet("Insight_EMI_Automated", rows => {
     const t = document.getElementById("emi");
     t.innerHTML = `
