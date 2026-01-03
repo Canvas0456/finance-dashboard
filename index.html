@@ -1,222 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
 <title>Kaiwalya – Finance Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
-  background: radial-gradient(circle at top, #0f172a, #020617);
-  color: #e5e7eb;
+body{
+  margin:0;
+  font-family:system-ui,-apple-system;
+  background:#020617;
+  color:#e5e7eb;
 }
-h1 {
-  text-align: center;
-  margin: 20px 0;
+h1{text-align:center;margin:12px 0}
+.section{padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.card{background:#020617;border-radius:14px;padding:14px;box-shadow:inset 0 0 0 1px #1e293b}
+.card h3{font-size:12px;color:#9ca3af;margin:0 0 6px}
+.card p{font-size:20px;margin:0;font-weight:600}
+.toggle{
+  display:flex;gap:8px;justify-content:center;margin-bottom:12px
 }
-.section {
-  padding: 16px;
+.toggle button{
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid #1e293b;
+  background:#020617;
+  color:#e5e7eb;
 }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
+.toggle button.active{
+  background:#2563eb;
+  border-color:#2563eb;
 }
-.card {
-  background: linear-gradient(145deg, #020617, #020617);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: inset 0 0 0 1px #1e293b;
+select{
+  background:#020617;
+  color:#e5e7eb;
+  border:1px solid #1e293b;
+  padding:8px;
+  border-radius:8px;
+  width:100%;
 }
-.card h3 {
-  font-size: 12px;
-  color: #9ca3af;
-  margin: 0 0 6px;
-}
-.card p {
-  font-size: 20px;
-  margin: 0;
-  font-weight: 600;
-}
-.chart {
-  background: #020617;
-  border-radius: 14px;
-  margin-top: 10px;
-  padding: 10px;
-}
-.alert {
-  margin-top: 10px;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 13px;
-}
-.alert.red { background:#7f1d1d; }
-.alert.green { background:#064e3b; }
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-.table th, .table td {
-  padding: 8px;
-  border-bottom: 1px solid #1e293b;
-}
-.badge {
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 11px;
-}
-.badge.ongoing { background:#92400e; }
-.badge.done { background:#065f46; }
 </style>
 </head>
 
 <body>
 
-<h1>📊 Kaiwalya – Finance Dashboard</h1>
+<h1>📊 Finance Dashboard</h1>
 
+<!-- TOGGLE -->
+<div class="toggle">
+  <button id="btnWeekly">Weekly</button>
+  <button id="btnMonthly" class="active">Monthly</button>
+  <button id="btnYTD">YTD</button>
+</div>
+
+<!-- SLICERS -->
+<div class="section" id="slicers">
+  <select id="weekSelect" style="display:none"></select>
+  <select id="monthSelect"></select>
+</div>
+
+<!-- KPI -->
 <div class="section">
   <div class="grid">
-    <div class="card"><h3>Total Balance</h3><p id="kpiBalance">–</p></div>
-    <div class="card"><h3>Income</h3><p id="kpiIncome">–</p></div>
-    <div class="card"><h3>Expenses</h3><p id="kpiExpense">–</p></div>
-    <div class="card"><h3>Investments</h3><p id="kpiInvest">–</p></div>
-    <div class="card"><h3>Net Savings</h3><p id="kpiNet">–</p></div>
-    <div class="card"><h3>Budget Used %</h3><p id="kpiBudgetPct">–</p></div>
-    <div class="card"><h3>Top Expense</h3><p id="kpiTop">–</p></div>
+    <div class="card"><h3>Income</h3><p id="kIncome">–</p></div>
+    <div class="card"><h3>Expenses</h3><p id="kExpense">–</p></div>
+    <div class="card"><h3>Net</h3><p id="kNet">–</p></div>
   </div>
 </div>
 
-<div class="section">
-  <h3>💰 Budget vs Actual</h3>
-  <div id="budgetCards" class="grid"></div>
-</div>
-
-<div class="section">
-  <h3>📊 Expense Breakdown</h3>
-  <div id="donut" class="chart" style="height:300px"></div>
-</div>
-
-<div class="section">
-  <h3>📈 Monthly Expense Trend</h3>
-  <div id="trend" class="chart" style="height:300px"></div>
-</div>
-
-<div class="section">
-  <h3>📉 EMI Tracker</h3>
-  <table class="table" id="emiTable"></table>
-</div>
-
-<div class="section" id="alerts"></div>
-
 <script>
-google.charts.load("current", { packages: ["corechart"] });
-google.charts.setOnLoadCallback(drawAll);
+google.charts.load("current",{packages:["corechart"]});
+google.charts.setOnLoadCallback(init);
 
-const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+let MODE="MONTHLY";
 
-function gviz(sheet) {
-  return fetch(
-    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`
-  ).then(r => r.text()).then(t => JSON.parse(t.substr(47).slice(0,-2)));
+function gviz(sheet){
+  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`)
+    .then(r=>r.text())
+    .then(t=>JSON.parse(t.substr(47).slice(0,-2)));
 }
 
-async function drawAll() {
-  drawKPIs();
-  drawBudget();
-  drawDonut();
-  drawTrend();
-  drawEMI();
+/* INIT */
+async function init(){
+  setupToggles();
+  await loadMonthSlicer();
+  refresh();
 }
 
-async function drawKPIs() {
-  const d = await gviz("Dashboard_KPIs");
-  const r = d.table.rows;
-
-  const map = {};
-  r.forEach(x => map[x.c[0].v] = Number(x.c[1]?.v || 0));
-
-  kpiBalance.innerText = map["Total Balance (All Accounts)"];
-  kpiIncome.innerText = map["Current Month Income"];
-  kpiExpense.innerText = map["Current Month Expenses"];
-  kpiInvest.innerText = map["Current Month Investments"];
-  kpiNet.innerText = map["Current Month Net Savings"];
-  kpiBudgetPct.innerText = map["Budget Used %"] + "%";
-  kpiTop.innerText = map["Top Expense Category"] || "—";
+/* TOGGLES */
+function setupToggles(){
+  btnWeekly.onclick=()=>setMode("WEEKLY");
+  btnMonthly.onclick=()=>setMode("MONTHLY");
+  btnYTD.onclick=()=>setMode("YTD");
 }
 
-async function drawBudget() {
-  const d = await gviz("Budgets_vs_Actuals");
-  const wrap = document.getElementById("budgetCards");
-  wrap.innerHTML = "";
+function setMode(m){
+  MODE=m;
+  document.querySelectorAll(".toggle button").forEach(b=>b.classList.remove("active"));
+  document.getElementById("btn"+m.charAt(0)+m.slice(1).toLowerCase()).classList.add("active");
 
-  d.table.rows.forEach(r => {
-    const cat = r.c[1]?.v;
-    const budget = Number(r.c[2]?.v || 0);
-    const actual = Number(r.c[3]?.v || 0);
-    if (!cat || budget === 0) return;
+  weekSelect.style.display = m==="WEEKLY"?"block":"none";
+  monthSelect.style.display = m==="MONTHLY"?"block":"none";
 
-    const pct = Math.round((actual / budget) * 100);
-    const card = document.createElement("div");
-    card.className = "card";
-    card.innerHTML = `<h3>${cat}</h3><p>₹${actual} / ₹${budget}</p>`;
-    wrap.appendChild(card);
+  refresh();
+}
 
-    if (pct > 90) {
-      alerts.innerHTML += `<div class="alert red">⚠️ Overspending on ${cat}</div>`;
+/* SLICERS */
+async function loadMonthSlicer(){
+  const d=await gviz("Finance_Monthly_Summary");
+  monthSelect.innerHTML="";
+  d.table.rows.forEach(r=>{
+    const m=r.c[0].v;
+    const opt=document.createElement("option");
+    opt.value=m;
+    opt.text=m;
+    monthSelect.appendChild(opt);
+  });
+  monthSelect.onchange=refresh;
+}
+
+/* KPI LOGIC */
+async function refresh(){
+  if(MODE==="MONTHLY") loadMonthly();
+  if(MODE==="YTD") loadYTD();
+  if(MODE==="WEEKLY") loadWeekly();
+}
+
+async function loadMonthly(){
+  const d=await gviz("Finance_Monthly_Summary");
+  const sel=monthSelect.value;
+  const r=d.table.rows.find(x=>x.c[0].v===sel);
+  if(!r)return;
+  kIncome.innerText=r.c[1].v;
+  kExpense.innerText=r.c[2].v;
+  kNet.innerText=r.c[4].v;
+}
+
+async function loadYTD(){
+  const d=await gviz("Finance_Monthly_Summary");
+  let inc=0,exp=0;
+  d.table.rows.forEach(r=>{
+    inc+=Number(r.c[1].v||0);
+    exp+=Number(r.c[2].v||0);
+  });
+  kIncome.innerText=inc;
+  kExpense.innerText=exp;
+  kNet.innerText=inc-exp;
+}
+
+async function loadWeekly(){
+  const d=await gviz("Txn_Clean");
+  let exp=0;
+  d.table.rows.forEach(r=>{
+    if(r.c[10].v===true){
+      exp+=Math.abs(r.c[8].v);
     }
   });
-}
-
-async function drawDonut() {
-  const d = await gviz("Category_Monthly_Actuals");
-  const data = new google.visualization.DataTable();
-  data.addColumn("string","Category");
-  data.addColumn("number","Amount");
-
-  d.table.rows.forEach(r => {
-    const c = r.c[1]?.v;
-    const a = Number(r.c[2]?.v || 0);
-    if (c && a > 0) data.addRow([c,a]);
-  });
-
-  if (data.getNumberOfRows() === 0) return;
-
-  new google.visualization.PieChart(donut)
-    .draw(data,{pieHole:0.6, backgroundColor:"transparent", legendTextStyle:{color:"#e5e7eb"}});
-}
-
-async function drawTrend() {
-  const d = await gviz("Finance_Monthly_Summary");
-  const data = new google.visualization.DataTable();
-  data.addColumn("string","Month");
-  data.addColumn("number","Expenses");
-
-  d.table.rows.forEach(r=>{
-    data.addRow([r.c[0].v, Number(r.c[2].v)]);
-  });
-
-  new google.visualization.LineChart(trend)
-    .draw(data,{backgroundColor:"transparent", legend:"none"});
-}
-
-async function drawEMI() {
-  const d = await gviz("Insight_EMI_Automated");
-  const t = document.getElementById("emiTable");
-  t.innerHTML = "<tr><th>EMI</th><th>Months Left</th><th>Remaining ₹</th><th>Status</th></tr>";
-
-  d.table.rows.forEach(r=>{
-    t.innerHTML += `<tr>
-      <td>${r.c[0].v}</td>
-      <td>${r.c[1].v}</td>
-      <td>₹${r.c[2].v}</td>
-      <td><span class="badge ongoing">ONGOING</span></td>
-    </tr>`;
-  });
+  kIncome.innerText="–";
+  kExpense.innerText=exp;
+  kNet.innerText=-exp;
 }
 </script>
 
