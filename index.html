@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Kaiwalya – Personal Finance Dashboard</title>
+<title>Kaiwalya – Finance Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Google Visualization API -->
+<script src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+google.charts.load("current", { packages:["table"] });
+</script>
 
 <style>
 body {
@@ -46,9 +52,6 @@ h1 {
   margin: 6px 0 0;
   font-weight: 600;
 }
-.positive { color: #22c55e; }
-.negative { color: #ef4444; }
-
 .bar {
   height: 10px;
   background: #1e293b;
@@ -60,7 +63,6 @@ h1 {
   height: 100%;
   background: linear-gradient(90deg,#22c55e,#4ade80);
 }
-
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -101,71 +103,86 @@ h1 {
 </div>
 
 <script>
-// ===== YOUR LIVE GOOGLE SHEET (PUBLISHED) =====
-const BASE =
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vRLH-y2NpSvaDb6aVZQweoO2Bymd-PIN6EiPblnuUmIFqBkoqIu2p8UXW6uMb_TCZbLKIIBXHpHP3La/gviz/tq?tqx=out:csv&sheet=";
+// ===== GOOGLE SHEET ID (PUBLISHED) =====
+const SHEET_ID =
+"2PACX-1vRLH-y2NpSvaDb6aVZQweoO2Bymd-PIN6EiPblnuUmIFqBkoqIu2p8UXW6uMb_TCZbLKIIBXHpHP3La";
 
-const KPI_URL    = BASE + "Dashboard_KPIs";
-const BUDGET_URL = BASE + "Budgets_vs_Actuals";
-const EMI_URL    = BASE + "Insight_EMI_Automated";
-
-// ===== CSV FETCHER =====
-function fetchCSV(url) {
-  return fetch(url)
-    .then(res => res.text())
-    .then(text => text.trim().split("\n").map(r => r.split(",")));
+// ===== GENERIC SHEET FETCHER =====
+function fetchSheet(sheetName, callback) {
+  const query = new google.visualization.Query(
+    `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?sheet=${sheetName}`
+  );
+  query.send(response => {
+    if (response.isError()) {
+      console.error("Error loading " + sheetName);
+      return;
+    }
+    const data = response.getDataTable();
+    const rows = [];
+    for (let i = 0; i < data.getNumberOfRows(); i++) {
+      const row = [];
+      for (let j = 0; j < data.getNumberOfColumns(); j++) {
+        row.push(data.getValue(i, j));
+      }
+      rows.push(row);
+    }
+    callback(rows);
+  });
 }
 
-// ===== KPI CARDS =====
-fetchCSV(KPI_URL).then(data => {
-  const box = document.getElementById("kpis");
-  data.slice(1).forEach(r => {
-    const value = r[1];
-    const cls = value < 0 ? "negative" : "positive";
-    box.innerHTML += `
-      <div class="card">
-        <h3>${r[0]}</h3>
-        <p class="${cls}">${value}</p>
-      </div>`;
-  });
-});
+// ===== LOAD EVERYTHING AFTER GOOGLE API =====
+google.charts.setOnLoadCallback(() => {
 
-// ===== BUDGET BARS =====
-fetchCSV(BUDGET_URL).then(data => {
-  const el = document.getElementById("budget");
-  data.slice(1).forEach(r => {
-    const budget = Number(r[2]);
-    const actual = Number(r[3]);
-    const pct = Math.min(100, Math.round((actual / budget) * 100 || 0));
-    el.innerHTML += `
-      <div class="card">
-        <h3>${r[1]}</h3>
-        <p>₹${actual} / ₹${budget}</p>
-        <div class="bar"><span style="width:${pct}%"></span></div>
-      </div>`;
+  // KPIs
+  fetchSheet("Dashboard_KPIs", rows => {
+    const box = document.getElementById("kpis");
+    rows.forEach(r => {
+      box.innerHTML += `
+        <div class="card">
+          <h3>${r[0]}</h3>
+          <p>${r[1]}</p>
+        </div>`;
+    });
   });
-});
 
-// ===== EMI TABLE =====
-fetchCSV(EMI_URL).then(data => {
-  const t = document.getElementById("emi");
-  t.innerHTML = `
-    <tr>
-      <th>EMI</th>
-      <th>Months Left</th>
-      <th>Remaining ₹</th>
-      <th>Status</th>
-    </tr>`;
-  data.slice(1).forEach(r => {
-    const badge = r[6].includes("COMPLETED") ? "ok" : "warn";
-    t.innerHTML += `
+  // Budgets
+  fetchSheet("Budgets_vs_Actuals", rows => {
+    const el = document.getElementById("budget");
+    rows.forEach(r => {
+      const budget = Number(r[2]) || 0;
+      const actual = Number(r[3]) || 0;
+      const pct = Math.min(100, Math.round((actual / budget) * 100 || 0));
+      el.innerHTML += `
+        <div class="card">
+          <h3>${r[1]}</h3>
+          <p>₹${actual} / ₹${budget}</p>
+          <div class="bar"><span style="width:${pct}%"></span></div>
+        </div>`;
+    });
+  });
+
+  // EMI
+  fetchSheet("Insight_EMI_Automated", rows => {
+    const t = document.getElementById("emi");
+    t.innerHTML = `
       <tr>
-        <td>${r[0]}</td>
-        <td>${r[3]}</td>
-        <td>₹${r[5]}</td>
-        <td><span class="badge ${badge}">${r[6]}</span></td>
+        <th>EMI</th>
+        <th>Months Left</th>
+        <th>Remaining ₹</th>
+        <th>Status</th>
       </tr>`;
+    rows.forEach(r => {
+      const badge = r[6].includes("COMPLETED") ? "ok" : "warn";
+      t.innerHTML += `
+        <tr>
+          <td>${r[0]}</td>
+          <td>${r[3]}</td>
+          <td>₹${r[5]}</td>
+          <td><span class="badge ${badge}">${r[6]}</span></td>
+        </tr>`;
+    });
   });
+
 });
 </script>
 
