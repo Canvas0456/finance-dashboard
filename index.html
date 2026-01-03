@@ -5,10 +5,10 @@
 <title>Kaiwalya – Finance Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google Charts Loader -->
+<!-- Google Charts -->
 <script src="https://www.gstatic.com/charts/loader.js"></script>
 <script>
-google.charts.load("current", { packages:["table"] });
+google.charts.load("current", { packages:["corechart","table"] });
 </script>
 
 <style>
@@ -25,7 +25,7 @@ body {
 }
 h1 {
   font-size: 22px;
-  margin: 10px 0 16px;
+  margin: 8px 0 16px;
 }
 .section-title {
   margin-top: 28px;
@@ -74,6 +74,14 @@ h1 {
   border-bottom: 1px solid #1e293b;
   font-size: 13px;
 }
+.alert {
+  background:#7c2d12;
+  color:#f97316;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:10px;
+  font-size:14px;
+}
 .badge {
   padding: 4px 8px;
   border-radius: 8px;
@@ -89,59 +97,58 @@ h1 {
 
 <h1>📊 Kaiwalya – Finance Dashboard</h1>
 
-<!-- KPI CARDS -->
+<div id="alerts"></div>
+
+<!-- KPI -->
 <div class="grid" id="kpis"></div>
 
-<!-- BUDGET SECTION -->
+<!-- Budget -->
 <h2 class="section-title">💰 Budget vs Actual</h2>
 <div class="grid" id="budget"></div>
 
-<!-- EMI SECTION -->
+<!-- Charts -->
+<h2 class="section-title">📊 Expense Breakdown</h2>
+<div id="donut" style="height:300px"></div>
+
+<h2 class="section-title">📈 Monthly Expense Trend</h2>
+<div id="trend" style="height:300px"></div>
+
+<!-- EMI -->
 <h2 class="section-title">📉 EMI Tracker</h2>
 <table class="table" id="emi"></table>
 
 </div>
 
 <script>
-// ================= CONFIG =================
 const SHEET_ID =
 "2PACX-1vRLH-y2NpSvaDb6aVZQweoO2Bymd-PIN6EiPblnuUmIFqBkoqIu2p8UXW6uMb_TCZbLKIIBXHpHP3La";
 
-// =============== CORE FETCHER ===============
 function fetchSheet(sheetName, callback) {
-  const url =
-    `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+  const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
   const query = new google.visualization.Query(url);
-
-  // 🔑 CRITICAL FIX
   query.setQuery("select *");
-
-  query.send(response => {
-    if (response.isError()) {
-      console.error("Error loading:", sheetName);
-      return;
-    }
-    const data = response.getDataTable();
+  query.send(res => {
+    if (res.isError()) return;
+    const dt = res.getDataTable();
     const rows = [];
-    for (let i = 0; i < data.getNumberOfRows(); i++) {
-      const row = [];
-      for (let j = 0; j < data.getNumberOfColumns(); j++) {
-        row.push(data.getValue(i, j));
+    for (let i=0;i<dt.getNumberOfRows();i++){
+      const r=[];
+      for (let j=0;j<dt.getNumberOfColumns();j++){
+        r.push(dt.getValue(i,j));
       }
-      rows.push(row);
+      rows.push(r);
     }
     callback(rows);
   });
 }
 
-// =============== LOAD DATA =================
 google.charts.setOnLoadCallback(() => {
 
-  // ===== KPIs =====
+  /* KPIs */
   fetchSheet("Dashboard_KPIs", rows => {
-    const box = document.getElementById("kpis");
-    rows.forEach(r => {
-      box.innerHTML += `
+    const k = document.getElementById("kpis");
+    rows.forEach(r=>{
+      k.innerHTML+=`
         <div class="card">
           <h3>${r[0]}</h3>
           <p>${r[1]}</p>
@@ -149,35 +156,73 @@ google.charts.setOnLoadCallback(() => {
     });
   });
 
-  // ===== BUDGETS =====
+  /* Budgets + Alerts + Donut */
   fetchSheet("Budgets_vs_Actuals", rows => {
-    const el = document.getElementById("budget");
-    rows.forEach(r => {
-      const budget = Number(r[2]) || 0;
-      const actual = Number(r[3]) || 0;
-      const pct = Math.min(100, Math.round((actual / budget) * 100 || 0));
-      el.innerHTML += `
+    const b = document.getElementById("budget");
+    const a = document.getElementById("alerts");
+
+    const pie = new google.visualization.DataTable();
+    pie.addColumn("string","Category");
+    pie.addColumn("number","Actual");
+
+    rows.forEach(r=>{
+      const cat=r[1], budget=Number(r[2]), actual=Number(r[3]);
+      const pct=Math.min(100,Math.round(actual/budget*100||0));
+
+      b.innerHTML+=`
         <div class="card">
-          <h3>${r[1]}</h3>
+          <h3>${cat}</h3>
           <p>₹${actual} / ₹${budget}</p>
           <div class="bar"><span style="width:${pct}%"></span></div>
         </div>`;
+
+      if(actual>budget && budget>0){
+        a.innerHTML+=`
+          <div class="alert">
+            ⚠️ ${cat} overspent by ₹${actual-budget}
+          </div>`;
+      }
+
+      if(actual>0) pie.addRow([cat,actual]);
+    });
+
+    new google.visualization.PieChart(
+      document.getElementById("donut")
+    ).draw(pie,{
+      pieHole:0.6,
+      backgroundColor:"transparent",
+      legend:{textStyle:{color:"#e5e7eb"}}
     });
   });
 
-  // ===== EMI =====
+  /* Trend */
+  fetchSheet("Finance_Monthly_Summary", rows => {
+    const dt=new google.visualization.DataTable();
+    dt.addColumn("string","Month");
+    dt.addColumn("number","Expenses");
+
+    rows.forEach(r=>{
+      if(r[0]) dt.addRow([r[0],Number(r[2])]);
+    });
+
+    new google.visualization.LineChart(
+      document.getElementById("trend")
+    ).draw(dt,{
+      backgroundColor:"transparent",
+      legend:{textStyle:{color:"#e5e7eb"}},
+      hAxis:{textStyle:{color:"#94a3b8"}},
+      vAxis:{textStyle:{color:"#94a3b8"}}
+    });
+  });
+
+  /* EMI */
   fetchSheet("Insight_EMI_Automated", rows => {
-    const t = document.getElementById("emi");
-    t.innerHTML = `
-      <tr>
-        <th>EMI</th>
-        <th>Months Left</th>
-        <th>Remaining ₹</th>
-        <th>Status</th>
-      </tr>`;
-    rows.forEach(r => {
-      const badge = r[6].includes("COMPLETED") ? "ok" : "warn";
-      t.innerHTML += `
+    const t=document.getElementById("emi");
+    t.innerHTML=`
+      <tr><th>EMI</th><th>Months Left</th><th>Remaining ₹</th><th>Status</th></tr>`;
+    rows.forEach(r=>{
+      const badge=r[6].includes("COMPLETED")?"ok":"warn";
+      t.innerHTML+=`
         <tr>
           <td>${r[0]}</td>
           <td>${r[3]}</td>
