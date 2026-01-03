@@ -130,4 +130,94 @@ h1{text-align:center;margin:16px 0 4px;font-size:22px}
 <div class="section">
   <h3>🧠 What needs attention</h3>
   <div id="insights"></div>
-</div>
+</div
+<script>
+google.charts.load("current",{packages:["corechart"]});
+google.charts.setOnLoadCallback(init);
+
+const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+let VIEW_MODE="MONTH";
+
+function setMode(m){VIEW_MODE=m;init();}
+
+function gviz(sheet){
+  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`)
+    .then(r=>r.text())
+    .then(t=>JSON.parse(t.substr(47).slice(0,-2)));
+}
+  async function init(){
+  loadKPIs();
+  loadAccounts();
+  loadDonut();
+  loadTrend();
+  loadAI();
+}
+
+async function loadKPIs(){
+  const d=await gviz("Dashboard_KPIs");
+  const m={};
+  d.table.rows.forEach(r=>m[r.c[0].v]=r.c[1]?.v||0);
+  kTotal.innerText="₹"+m["Total Balance (All Accounts)"];
+  kNet.innerText="₹"+m["Current Month Net Savings"];
+  kMoM.innerText=(m["MoM %"]||0)+"%";
+  kRunway.innerText=(m["Cash Runway (Days)"]||"–")+" days";
+}
+
+async function loadAccounts(){
+  const d=await gviz("Account_Balances_Live");
+  accounts.innerHTML="";
+  d.table.rows.forEach(r=>{
+    const bal=Number(r.c[4].v);
+    let cls="safe",label="Safe";
+    if(bal<0){cls="risk";label="Critical";}
+    else if(bal<2000){cls="warn";label="Low";}
+    accounts.innerHTML+=`
+      <div class="card">
+        <h3>${r.c[0].v}</h3>
+        <p>${label}${label!=="Safe"?" • ₹"+bal:""}</p>
+      </div>`;
+  });
+}
+
+async function loadDonut(){
+  const d=await gviz("Category_Monthly_Actuals");
+  const data=new google.visualization.DataTable();
+  data.addColumn("string","Category");
+  data.addColumn("number","Amount");
+  d.table.rows.forEach(r=>{
+    if(Number(r.c[2].v)>0) data.addRow([r.c[1].v,Number(r.c[2].v)]);
+  });
+  if(data.getNumberOfRows())
+    new google.visualization.PieChart(donut)
+      .draw(data,{pieHole:0.65,legend:"none",backgroundColor:"transparent"});
+}
+
+async function loadTrend(){
+  const d=await gviz("Finance_Monthly_Summary");
+  const data=new google.visualization.DataTable();
+  data.addColumn("string","Month");
+  data.addColumn("number","Expenses");
+  d.table.rows.forEach(r=>data.addRow([r.c[0].v,Number(r.c[2].v)]));
+  new google.visualization.LineChart(trend)
+    .draw(data,{backgroundColor:"transparent",legend:"none"});
+}
+
+async function loadAI(){
+  const d=await gviz("AI_Insights");
+  insights.innerHTML="";
+  let shown=0;
+  d.table.rows.forEach(r=>{
+    if(!r.c[0].v || shown>=3) return;
+    let cls=r.c[1].v==="HIGH"?"red":r.c[1].v==="MEDIUM"?"yellow":"green";
+    insights.innerHTML+=`
+      <div class="alert ${cls}">
+        <strong>${r.c[2].v}</strong><br>
+        ${r.c[3].v}<br>
+        <em>${r.c[4].v}</em>
+      </div>`;
+    shown++;
+  });
+}
+</script>
+</body>
+</html>
