@@ -2,239 +2,144 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Financial Intelligence</title>
+<title>Kaiwalya’s Finance Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<script src="https://www.gstatic.com/charts/loader.js"></script>
 
 <style>
 :root{
-  --bg:#020617;
-  --card:#020617;
-  --border:#1e293b;
-  --text:#e5e7eb;
-  --muted:#94a3b8;
-
-  --safe:#064e3b;
-  --warn:#78350f;
-  --risk:#7f1d1d;
+  --bg:#f8f5f0;          /* Ivory background */
+  --card:#fffdf9;        /* Soft ivory card */
+  --border:#e7e2d9;
+  --text:#2f2f2f;
+  --muted:#7a746b;
+  --accent:#8b7d6b;      /* Finance neutral */
 }
 
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  background:radial-gradient(circle at top,#0f172a,#020617);
+  background:var(--bg);
   font-family:system-ui,-apple-system;
   color:var(--text);
 }
 
-h1{
-  text-align:center;
-  margin:18px 0 6px;
-  font-size:22px;
-}
-
-.sub{
-  text-align:center;
-  color:var(--muted);
-  font-size:12px;
-}
-
-.section{padding:14px}
-
-.card{
+/* Fixed top bar */
+.top-bar{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:52px;
   background:var(--card);
-  border-radius:16px;
-  padding:16px;
-  box-shadow:inset 0 0 0 1px var(--border);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  z-index:1000;
 }
 
-.grid{
+.title{
+  font-size:16px;
+  font-weight:600;
+}
+
+.date{
+  font-size:13px;
+  color:var(--muted);
+}
+
+/* Page content */
+.container{
+  padding:76px 14px 20px; /* space for fixed bar */
+}
+
+/* KPI grid */
+.kpi-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  grid-template-columns:repeat(2,1fr);
   gap:12px;
 }
 
-.alert{
+.kpi{
+  background:var(--card);
+  border:1px solid var(--border);
   border-radius:14px;
   padding:14px;
-  font-size:14px;
 }
 
-.alert.safe{background:var(--safe)}
-.alert.warn{background:var(--warn)}
-.alert.risk{background:var(--risk)}
+.kpi h3{
+  margin:0;
+  font-size:12px;
+  font-weight:500;
+  color:var(--muted);
+}
 
-.small{font-size:12px;color:var(--muted)}
+.kpi p{
+  margin:6px 0 0;
+  font-size:22px;
+  font-weight:600;
+  letter-spacing:0.2px;
+}
 
-details summary{
-  cursor:pointer;
-  color:#cbd5f5;
+/* Accent card (Budget Burn) */
+.kpi.accent{
+  border-color:var(--accent);
+}
+
+/* Responsive */
+@media(min-width:640px){
+  .kpi-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
 }
 </style>
 </head>
 <body>
-<h1>💡 Financial Status</h1>
-<div class="sub">Calm • Today-focused • Action-first</div>
 
-<div class="section">
-  <div class="card" style="text-align:center">
-    <div id="statusLine" style="font-size:26px;font-weight:700">–</div>
-    <div id="statusSub" class="small">–</div>
-  </div>
+<!-- Top fixed bar -->
+<div class="top-bar">
+  <div class="title">Kaiwalya’s Finance Dashboard</div>
+  <div class="date" id="todayDate">–</div>
 </div>
 
-<div class="section">
-  <h3>👉 What to do now</h3>
-  <div id="primaryAction"></div>
-</div>
+<!-- Main content -->
+<div class="container">
 
-  <div class="section">
-  <h3>⚠️ Accounts needing attention</h3>
-  <div id="riskyAccounts" class="grid"></div>
-</div>
-
-  <div class="section">
-  <h3>📥 Money to receive</h3>
-  <div id="receivables"></div>
-</div>
-
-  <div class="section">
-  <div class="grid">
-    <div class="card">
-      <h3>Total Balance</h3>
-      <div id="kTotal">–</div>
+  <div class="kpi-grid">
+    <div class="kpi">
+      <h3>Available Balance</h3>
+      <p id="kBalance">₹–</p>
     </div>
-    <div class="card">
-      <h3>Net Cashflow (Month)</h3>
-      <div id="kNet">–</div>
+
+    <div class="kpi">
+      <h3>Total Expense</h3>
+      <p id="kExpense">₹–</p>
     </div>
-    <div class="card">
-      <h3>Cash Runway</h3>
-      <div id="kRunway">–</div>
+
+    <div class="kpi accent">
+      <h3>Budget Burn %</h3>
+      <p id="kBurn">–%</p>
     </div>
   </div>
+
 </div>
 
-  <div class="section">
-  <details>
-    <summary>📊 Where money went</summary>
-    <div id="donut" style="height:220px"></div>
-  </details>
-</div>
+<script>
+/* Today’s Date */
+const d = new Date();
+todayDate.innerText = d.toLocaleDateString("en-IN", {
+  day:"2-digit",
+  month:"short",
+  year:"numeric"
+});
 
-  <script>
-google.charts.load("current",{packages:["corechart"]});
-google.charts.setOnLoadCallback(init);
-
-const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
-
-function gviz(sheet){
-  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`)
-    .then(r=>r.text())
-    .then(t=>JSON.parse(t.substr(47).slice(0,-2)));
-}
-
-  async function init(){
-  await loadStatus();
-  await loadPrimaryAction();
-  await loadRiskyAccounts();
-  await loadReceivables();
-  await loadContext();
-  await loadDonut();
-}
-
-async function loadStatus(){
-  const d=await gviz("Dashboard_KPIs");
-  let runway=0;
-  d.table.rows.forEach(r=>{
-    if(r.c[0].v==="Cash Runway (Days)") runway=Number(r.c[1].v);
-  });
-
-  if(runway>=10){
-    statusLine.innerText="You are financially stable today.";
-    statusSub.innerText="No immediate action required.";
-  }else if(runway>=5){
-    statusLine.innerText="Cash is tight.";
-    statusSub.innerText="Avoid unnecessary spending this week.";
-  }else{
-    statusLine.innerText="Immediate action needed.";
-    statusSub.innerText="You may run out of cash very soon.";
-  }
-}
-
-async function loadPrimaryAction(){
-  const d=await gviz("AI_Insights");
-  primaryAction.innerHTML="";
-  d.table.rows.forEach(r=>{
-    if(r.c[1].v==="HIGH"){
-      primaryAction.innerHTML=`
-        <div class="alert risk">
-          <strong>${r.c[2].v}</strong><br>
-          ${r.c[3].v}<br>
-          <em>${r.c[4].v}</em>
-        </div>`;
-    }
-  });
-}
-
-async function loadRiskyAccounts(){
-  const bal=await gviz("Account_Balances_Live");
-  const run=await gviz("Account_Runway");
-  riskyAccounts.innerHTML="";
-
-  bal.table.rows.forEach((r,i)=>{
-    const days=Number(run.table.rows[i]?.c[1]?.v||0);
-    if(days>=10) return;
-
-    riskyAccounts.innerHTML+=`
-      <div class="card">
-        <strong>${r.c[0].v}</strong><br>
-        ${days} days runway
-      </div>`;
-  });
-}
-
-async function loadReceivables(){
-  const d=await gviz("Receivables_Payables");
-  let html="";
-  d.table.rows.forEach(r=>{
-    if(r.c[2].v>0){
-      html+=`
-        <div class="card" style="margin-bottom:8px">
-          <strong>${r.c[0].v}</strong><br>
-          ₹${r.c[2].v}
-        </div>`;
-    }
-  });
-  receivables.innerHTML=html||"<div class='small'>No receivables</div>";
-}
-
-async function loadContext(){
-  const d=await gviz("Dashboard_KPIs");
-  const m={};
-  d.table.rows.forEach(r=>m[r.c[0].v]=r.c[1]?.v||0);
-  kTotal.innerText="₹"+m["Total Balance (All Accounts)"];
-  kNet.innerText="₹"+m["Current Month Net Savings"];
-  kRunway.innerText=(m["Cash Runway (Days)"]||"–")+" days";
-}
-
-async function loadDonut(){
-  const d=await gviz("Category_Monthly_Actuals");
-  const data=new google.visualization.DataTable();
-  data.addColumn("string","Category");
-  data.addColumn("number","Amount");
-  d.table.rows.forEach(r=>{
-    if(Number(r.c[2].v)>0) data.addRow([r.c[1].v,Number(r.c[2].v)]);
-  });
-  if(data.getNumberOfRows())
-    new google.visualization.PieChart(donut)
-      .draw(data,{pieHole:0.65,legend:"none",backgroundColor:"transparent"});
-}
+/* Placeholder values (will be wired later) */
+kBalance.innerText = "₹22,768";
+kExpense.innerText = "₹14,447";
+kBurn.innerText = "63%";
 </script>
+
 </body>
 </html>
-
-  
-  
