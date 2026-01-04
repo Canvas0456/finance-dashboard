@@ -18,7 +18,6 @@
 }
 
 *{box-sizing:border-box}
-
 body{
   margin:0;
   background:var(--bg);
@@ -35,13 +34,11 @@ body{
   padding:12px 16px;
   z-index:1000;
 }
-
 .header-top{
   display:flex;
   justify-content:space-between;
   align-items:center;
 }
-
 .title{font-size:17px;font-weight:600}
 .date{font-size:13px;color:var(--muted)}
 .subtitle{font-size:12px;color:var(--muted);margin-top:4px}
@@ -60,26 +57,43 @@ body{
   margin-bottom:16px;
 }
 
+/* TOGGLES */
+.toggle{
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+}
+.toggle button{
+  flex:1;
+  padding:8px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--card);
+  font-size:13px;
+  cursor:pointer;
+}
+.toggle button.active{
+  background:#efe9e1;
+  border-color:var(--accent);
+}
+
 /* KPI */
 .kpi-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:12px;
 }
-
 .kpi{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:14px;
   padding:14px;
 }
-
 .kpi h3{
   margin:0;
   font-size:12px;
   color:var(--muted);
 }
-
 .kpi p{
   margin-top:6px;
   font-size:20px;
@@ -114,14 +128,12 @@ body{
   font-size:14px;
   font-weight:600;
 }
-
 .account-list{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:14px;
   overflow:hidden;
 }
-
 .account-row{
   display:flex;
   justify-content:space-between;
@@ -129,7 +141,6 @@ body{
   border-bottom:1px solid var(--border);
   font-size:14px;
 }
-
 .account-row:last-child{border-bottom:none}
 .account-name{color:var(--muted)}
 .account-amt{font-weight:600}
@@ -142,6 +153,11 @@ body{
   border-radius:14px;
   padding:14px;
 }
+.chart-caption{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:6px;
+}
 </style>
 </head>
 
@@ -150,7 +166,7 @@ body{
 <div class="header">
   <div class="header-top">
     <div class="title">Kaiwalya’s Finance Dashboard</div>
-    <div class="date" id="todayDate">–</div>
+    <div class="date" id="todayDate"></div>
   </div>
   <div class="subtitle">“Calm tracking leads to better decisions.”</div>
 </div>
@@ -159,120 +175,138 @@ body{
 
   <div class="thought" id="thought">Loading today’s thought…</div>
 
-  <!-- KPI -->
-  <div class="kpi-grid">
-    <div class="kpi">
-      <h3>Total Balance</h3>
-      <p id="kBalance">–</p>
-    </div>
-    <div class="kpi">
-      <h3>Total Expenses</h3>
-      <p id="kExpense">–</p>
-    </div>
-    <div class="kpi">
-      <h3>Budget Remaining</h3>
-      <p id="kRemain">–</p>
-    </div>
-    <div class="kpi">
-      <h3>Budget Burn %</h3>
-      <p id="kBurn">–%</p>
-    </div>
+  <div class="toggle">
+    <button id="btnMonth" class="active">Month</button>
+    <button id="btnYTD">YTD</button>
   </div>
 
-  <!-- Budget -->
+  <div class="kpi-grid">
+    <div class="kpi"><h3>Total Balance</h3><p id="kBalance">–</p></div>
+    <div class="kpi"><h3>Total Expenses</h3><p id="kExpense">–</p></div>
+    <div class="kpi"><h3>Budget Remaining</h3><p id="kRemain">–</p></div>
+    <div class="kpi"><h3>Budget Burn %</h3><p id="kBurn">–%</p></div>
+  </div>
+
   <div class="budget">
     <div class="budget-labels">
       <span id="usedLabel">Used: –%</span>
       <span id="remainLabel">Remaining: –%</span>
     </div>
-    <div class="bar-bg">
-      <div class="bar-used" id="budgetBar"></div>
-    </div>
+    <div class="bar-bg"><div class="bar-used" id="budgetBar"></div></div>
   </div>
 
-  <!-- Accounts -->
   <div class="section-title">Account Balances</div>
   <div class="account-list" id="accounts"></div>
 
-  <!-- Trend -->
   <div class="chart-card">
     <canvas id="trendChart" height="140"></canvas>
+    <div class="chart-caption" id="chartCaption"></div>
   </div>
 
 </div>
 
 <script>
-/* DATE */
-todayDate.innerText = new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
-
-/* THOUGHT */
-fetch("https://api.quotable.io/random?tags=wisdom")
-  .then(r=>r.json())
-  .then(q=>thought.innerText=q.content);
-
-/* SHEET CONFIG */
 const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+todayDate.innerText=new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
 
+/* Thought */
+fetch("https://api.allorigins.win/raw?url=https://zenquotes.io/api/today")
+.then(r=>r.json())
+.then(d=>thought.innerText=d[0].q)
+.catch(()=>thought.innerText="Consistency is more powerful than intensity.");
+
+/* Fetch helper */
 function fetchSheet(sheet){
-  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}`;
-  return fetch(url).then(r=>r.text())
+  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}`)
+    .then(r=>r.text())
     .then(t=>JSON.parse(t.substring(47).slice(0,-2)));
 }
 
-/* LOAD KPIs */
+/* KPIs */
 fetchSheet("Dashboard_KPIs").then(d=>{
-  let balance=0, expense=0, burn=0;
+  let bal=0, exp=0, burn=0;
   d.table.rows.forEach(r=>{
     const k=r.c[0]?.v, v=r.c[1]?.v;
-    if(k==="Total Balance (All Accounts)") balance=v;
-    if(k==="Current Month Expenses") expense=v;
+    if(k==="Total Balance (All Accounts)") bal=v;
+    if(k==="Current Month Expenses") exp=v;
     if(k==="Budget Used %") burn=v;
   });
-
-  const used=Math.round(burn*100);
-  const rem=100-used;
-
-  kBalance.innerText="₹"+balance.toLocaleString("en-IN");
-  kExpense.innerText="₹"+expense.toLocaleString("en-IN");
+  const used=Math.round(burn*100), rem=100-used;
+  kBalance.innerText="₹"+bal.toLocaleString("en-IN");
+  kExpense.innerText="₹"+exp.toLocaleString("en-IN");
   kBurn.innerText=used+"%";
-  kRemain.innerText="₹"+(balance-expense).toLocaleString("en-IN");
-
+  kRemain.innerText="₹"+(bal-exp).toLocaleString("en-IN");
   budgetBar.style.width=used+"%";
   usedLabel.innerText="Used: "+used+"%";
   remainLabel.innerText="Remaining: "+rem+"%";
 });
 
-/* LOAD ACCOUNTS */
+/* Accounts */
 fetchSheet("Account_Balances_Live").then(d=>{
-  const el=document.getElementById("accounts");
   d.table.rows.forEach(r=>{
-    const name=r.c[0]?.v;
-    const bal=r.c[4]?.v;
-    if(!name) return;
-    el.innerHTML+=`
+    if(!r.c[0]?.v) return;
+    accounts.innerHTML+=`
       <div class="account-row">
-        <div class="account-name">${name}</div>
-        <div class="account-amt">₹${bal.toLocaleString("en-IN")}</div>
+        <div class="account-name">${r.c[0].v}</div>
+        <div class="account-amt">₹${r.c[4].v.toLocaleString("en-IN")}</div>
       </div>`;
   });
 });
 
-/* TREND (placeholder – can wire later) */
-new Chart(trendChart,{
+/* Trend Chart */
+const ctx=document.getElementById("trendChart");
+let chart=new Chart(ctx,{
   type:"line",
-  data:{
-    labels:["W1","W2","W3","W4"],
-    datasets:[{
-      data:[3200,2800,4100,2347],
-      borderColor:"#8b7d6b",
-      tension:.4,
-      pointRadius:4
-    }]
-  },
-  options:{
-    plugins:{legend:{display:false}},
-    scales:{x:{grid:{display:false}},y:{grid:{display:false}}}
+  data:{labels:[],datasets:[{data:[],borderColor:"#8b7d6b",tension:.4,pointRadius:4}]},
+  options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{display:false}}}}
+});
+
+/* REAL DATA FROM Txn_Clean */
+fetchSheet("Txn_Clean").then(d=>{
+  const rows=d.table.rows;
+  const currentMonth=new Date().toISOString().slice(0,7);
+
+  function showMonth(){
+    const weeks=[0,0,0,0,0];
+    rows.forEach(r=>{
+      if(!r.c[4]||!r.c[11]?.v) return;
+      if(r.c[3].v!==currentMonth) return;
+      const date=new Date(Math.round((r.c[1].v-25569)*86400*1000));
+      const wk=Math.min(4,Math.ceil(date.getDate()/7))-1;
+      weeks[wk]+=Math.abs(r.c[4].v);
+    });
+    chart.data.labels=["W1","W2","W3","W4","W5"];
+    chart.data.datasets[0].data=weeks;
+    chart.update();
+    chartCaption.innerText="Weekly expense trend (current month)";
   }
+
+  function showYTD(){
+    const months=Array(12).fill(0);
+    rows.forEach(r=>{
+      if(!r.c[4]||!r.c[11]?.v) return;
+      const m=parseInt(r.c[3].v.slice(5,7))-1;
+      months[m]+=Math.abs(r.c[4].v);
+    });
+    chart.data.labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    chart.data.datasets[0].data=months;
+    chart.update();
+    chartCaption.innerText="Monthly expense trend (YTD)";
+  }
+
+  showMonth();
+
+  btnMonth.onclick=()=>{
+    btnMonth.classList.add("active");
+    btnYTD.classList.remove("active");
+    showMonth();
+  };
+
+  btnYTD.onclick=()=>{
+    btnYTD.classList.add("active");
+    btnMonth.classList.remove("active");
+    showYTD();
+  };
 });
 </script>
 
