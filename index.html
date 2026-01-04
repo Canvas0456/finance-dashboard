@@ -1,129 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Kaiwalya’s Finance Dashboard</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
-  --bg:#f8f6f1;
+  --bg:#faf7f2;
   --card:#ffffff;
   --text:#2b2b2b;
-  --muted:#777;
-  --accent:#2f5bea;
-  --good:#2fa36b;
-  --warn:#e5533d;
+  --muted:#7a7a7a;
+  --accent:#4a6cf7;
+  --danger:#e5533d;
+  --success:#2e9e6f;
 }
-*{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:Inter,system-ui,-apple-system,sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
   background:var(--bg);
   color:var(--text);
 }
+
 header{
-  position:sticky;
+  position:fixed;
   top:0;
-  background:#fffdfa;
-  padding:18px 24px;
-  border-bottom:1px solid #e4e1d8;
+  left:0;
+  right:0;
+  background:var(--bg);
+  padding:16px 24px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   z-index:10;
+  border-bottom:1px solid #e6e1d8;
 }
-header h1{font-size:20px;margin:0}
-header small{color:var(--muted);font-size:13px}
-.container{
+
+h1{
+  margin:0;
+  font-size:20px;
+  font-weight:600;
+}
+
+.date{
+  font-size:14px;
+  color:var(--muted);
+}
+
+main{
+  padding:96px 20px 40px;
   max-width:1200px;
   margin:auto;
-  padding:24px;
 }
-.toggle{
-  display:inline-flex;
-  background:#ebe7db;
-  border-radius:10px;
-  overflow:hidden;
-  margin-bottom:20px;
-}
-.toggle button{
-  padding:8px 18px;
-  border:none;
-  background:none;
-  font-weight:600;
-  cursor:pointer;
-  color:#555;
-}
-.toggle button.active{
-  background:var(--accent);
-  color:white;
-}
+
 .kpis{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:16px;
 }
+
 .card{
   background:var(--card);
+  border-radius:14px;
   padding:18px;
-  border-radius:16px;
-  box-shadow:0 8px 24px rgba(0,0,0,.05);
+  box-shadow:0 6px 18px rgba(0,0,0,0.04);
 }
+
 .card h3{
+  margin:0;
   font-size:13px;
   color:var(--muted);
-  margin:0;
 }
+
 .card p{
+  margin:8px 0 0;
   font-size:22px;
-  font-weight:700;
-  margin:6px 0 0;
+  font-weight:600;
 }
+
+.bar-wrap{
+  margin-top:24px;
+}
+
 .bar{
-  margin:28px 0;
-  background:#e4e1d8;
-  height:16px;
-  border-radius:10px;
+  height:12px;
+  background:#e6e1d8;
+  border-radius:8px;
   overflow:hidden;
 }
-.bar-inner{
+
+.bar-fill{
   height:100%;
+  background:linear-gradient(90deg,var(--accent),#7aa2ff);
   width:0%;
-  background:linear-gradient(90deg,var(--accent),#67d4a2);
-  transition:width .6s ease;
 }
-.section{margin-top:28px}
-.section h2{font-size:16px;margin-bottom:12px}
-canvas{
-  background:white;
-  border-radius:16px;
-  padding:18px;
-}
-ul{padding-left:18px;margin:10px 0}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:14px;
-}
-th,td{
-  padding:10px 6px;
-  border-bottom:1px solid #eee;
-}
-th{
-  text-align:left;
-  font-size:13px;
+
+.bar-label{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  margin-top:6px;
   color:var(--muted);
 }
-.status-low{color:var(--warn);font-weight:600}
-.status-ok{color:var(--good);font-weight:600}
-footer{
-  text-align:center;
-  padding:24px;
-  font-size:12px;
-  color:#888;
+
+.section{
+  margin-top:40px;
+}
+
+canvas{
+  background:var(--card);
+  border-radius:14px;
+  padding:16px;
 }
 </style>
 </head>
@@ -132,156 +122,97 @@ footer{
 
 <header>
   <h1>Kaiwalya’s Finance Dashboard</h1>
-  <small id="today"></small>
+  <div class="date" id="today"></div>
 </header>
 
-<div class="container">
+<main>
 
-  <div class="toggle">
-    <button id="mBtn" class="active">Monthly</button>
-    <button id="yBtn">YTD</button>
-  </div>
-
-  <div class="kpis">
-    <div class="card"><h3>Total Balance</h3><p id="bal">₹0</p></div>
-    <div class="card"><h3>Total Expenses</h3><p id="exp">₹0</p></div>
-    <div class="card"><h3>Budget Used</h3><p id="burn">0%</p></div>
-    <div class="card"><h3>Top Category</h3><p id="top">—</p></div>
-  </div>
-
-  <div class="bar"><div class="bar-inner" id="bar"></div></div>
-
-  <div class="section">
-    <canvas id="trend" height="110"></canvas>
-  </div>
-
-  <div class="section card">
-    <h2>🧠 Smart Insights</h2>
-    <ul id="insights"></ul>
-  </div>
-
-  <div class="section card">
-    <h2>🚨 Overspend Alerts</h2>
-    <ul id="alerts"></ul>
-  </div>
-
-  <div class="section card">
-    <h2>📉 Cash Runway</h2>
-    <p id="runway">—</p>
-    <small>Based on current burn rate</small>
-  </div>
-
-  <div class="section card">
-    <h2>📊 Account Balances</h2>
-    <table>
-      <thead>
-        <tr><th>Account</th><th align="right">Balance</th><th>Status</th></tr>
-      </thead>
-      <tbody id="accounts"></tbody>
-    </table>
-  </div>
-
+<!-- KPI CARDS -->
+<div class="kpis">
+  <div class="card"><h3>Total Balance</h3><p id="kpi-balance">—</p></div>
+  <div class="card"><h3>Expenses</h3><p id="kpi-expense">—</p></div>
+  <div class="card"><h3>Budget Used</h3><p id="kpi-budget">—</p></div>
+  <div class="card"><h3>Net Savings</h3><p id="kpi-savings">—</p></div>
 </div>
 
-<footer>
-  Live data • Finance-grade logic • Clean visual system
-</footer>
+<!-- BUDGET BAR -->
+<div class="bar-wrap card">
+  <div class="bar">
+    <div class="bar-fill" id="budget-bar"></div>
+  </div>
+  <div class="bar-label">
+    <span id="budget-used">Used: —%</span>
+    <span id="budget-rem">Remaining: ₹—</span>
+  </div>
+</div>
+
+<!-- TREND -->
+<div class="section">
+  <canvas id="trendChart" height="120"></canvas>
+</div>
+
+</main>
 
 <script>
-const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
 
-const today=new Date();
-const month=today.toISOString().slice(0,7);
-const yearStart=today.getFullYear()+"-01";
-let mode="MONTH";
+document.getElementById("today").innerText =
+  new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
 
-document.getElementById("today").innerText=
-today.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
-
-mBtn.onclick=()=>setMode("MONTH");
-yBtn.onclick=()=>setMode("YTD");
-
-function setMode(m){
-  mode=m;
-  mBtn.classList.toggle("active",m==="MONTH");
-  yBtn.classList.toggle("active",m==="YTD");
-  load();
+function fetchSheet(sheet){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`;
+  return fetch(url)
+    .then(r=>r.text())
+    .then(t=>JSON.parse(t.substring(47).slice(0,-2)).table.rows);
 }
 
-async function fetchSheet(name){
-  const u=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${name}`;
-  const r=await fetch(u);
-  const t=await r.text();
-  return JSON.parse(t.substring(47).slice(0,-2)).table.rows;
-}
-
-let chart;
-
-async function load(){
-  const k=await fetchSheet("Dashboard_KPIs");
-  const a=await fetchSheet("Category_Monthly_Actuals");
-  const ac=await fetchSheet("Account_Balances_Live");
-
-  const get=x=>k.find(r=>r.c[0].v===x)?.c[1]?.v||0;
-
-  const bal=get("Total Balance (All Accounts)");
-  const exp=get("Current Month Expenses");
-  const burn=get("Budget Used %")*100;
-
-  balEl.innerText="₹"+bal.toLocaleString();
-  expEl.innerText="₹"+exp.toLocaleString();
-  burnEl.innerText=burn.toFixed(0)+"%";
-  bar.style.width=Math.min(burn,100)+"%";
-  top.innerText=get("Top Expense Category")||"—";
-
-  const buckets={};
-  a.forEach(r=>{
-    const m=r.c[0].v;
-    const v=r.c[2].v;
-    if(mode==="MONTH"&&m!==month)return;
-    if(mode==="YTD"&&(m<yearStart||m>month))return;
-    buckets[m]=(buckets[m]||0)+v;
+/* KPIs */
+fetchSheet("Dashboard_KPIs_Month").then(rows=>{
+  const map={};
+  rows.forEach(r=>{
+    if(r.c[0] && r.c[1]) map[r.c[0].v]=r.c[1].v;
   });
 
-  const labels=Object.keys(buckets).sort();
-  const data=labels.map(l=>buckets[l]);
+  document.getElementById("kpi-balance").innerText = "₹"+map["Total Balance (All Accounts)"];
+  document.getElementById("kpi-expense").innerText = "₹"+map["Current Month Expenses"];
+  document.getElementById("kpi-savings").innerText = "₹"+map["Current Month Net Savings"];
 
-  if(chart)chart.destroy();
-  chart=new Chart(trend,{
+  const used = map["Budget Used %"]*100;
+  document.getElementById("kpi-budget").innerText = used.toFixed(1)+"%";
+  document.getElementById("budget-bar").style.width = used+"%";
+  document.getElementById("budget-used").innerText = "Used: "+used.toFixed(1)+"%";
+  document.getElementById("budget-rem").innerText =
+    "Remaining: ₹"+map["Budget Remaining"];
+});
+
+/* Trend Chart */
+fetchSheet("Category_Monthly_Actuals").then(rows=>{
+  const labels=[], values=[];
+  rows.forEach(r=>{
+    labels.push(r.c[1].v);
+    values.push(r.c[2].v);
+  });
+
+  new Chart(document.getElementById("trendChart"),{
     type:"line",
-    data:{labels,datasets:[{data,borderColor:"#2f5bea",tension:.35}]},
+    data:{
+      labels,
+      datasets:[{
+        data:values,
+        borderColor:"#4a6cf7",
+        tension:.35,
+        fill:false
+      }]
+    },
     options:{
       plugins:{legend:{display:false}},
-      scales:{x:{grid:{display:false}},y:{grid:{display:false}}}
+      scales:{
+        x:{grid:{display:false}},
+        y:{grid:{display:false}}
+      }
     }
   });
-
-  insights.innerHTML="";
-  if(burn>80)insights.innerHTML+="<li>🚨 Budget usage is high. Review discretionary spends.</li>";
-  if(bal<5000)insights.innerHTML+="<li>⚠️ Low overall balance. Consider fund transfer.</li>";
-  if(!insights.innerHTML)insights.innerHTML="<li>✅ Finances are stable.</li>";
-
-  alerts.innerHTML="";
-  a.forEach(r=>{
-    if(r.c[2].v>1500)
-      alerts.innerHTML+=`<li>⚠️ High spend in ${r.c[1].v}: ₹${r.c[2].v}</li>`;
-  });
-  if(!alerts.innerHTML)alerts.innerHTML="<li>✅ No overspending detected</li>";
-
-  const avgDaily=exp/30;
-  runway.innerText=avgDaily?Math.floor(bal/avgDaily)+" days":"∞";
-
-  accounts.innerHTML=ac.map(r=>{
-    const b=r.c[4].v;
-    return `<tr>
-      <td>${r.c[0].v}</td>
-      <td align="right">₹${b.toLocaleString()}</td>
-      <td class="${b<1500?"status-low":"status-ok"}">${b<1500?"Low":"Safe"}</td>
-    </tr>`;
-  }).join("");
-}
-
-load();
+});
 </script>
 
 </body>
