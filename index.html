@@ -52,7 +52,7 @@ body{
 
 /* Page content */
 .container{
-  padding:76px 14px 20px; /* space for fixed bar */
+  padding:76px 14px 28px;
 }
 
 /* KPI grid */
@@ -83,9 +83,35 @@ body{
   letter-spacing:0.2px;
 }
 
-/* Accent card (Budget Burn) */
 .kpi.accent{
   border-color:var(--accent);
+}
+
+/* Budget bar */
+.budget-wrap{
+  margin-top:18px;
+}
+
+.budget-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  color:var(--muted);
+  margin-bottom:6px;
+}
+
+.budget-bar-bg{
+  height:10px;
+  background:#e7e2d9;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.budget-bar-used{
+  height:100%;
+  width:0%;
+  background:var(--accent);
+  border-radius:999px;
 }
 
 /* Responsive */
@@ -107,6 +133,7 @@ body{
 <!-- Main content -->
 <div class="container">
 
+  <!-- KPI Cards -->
   <div class="kpi-grid">
     <div class="kpi">
       <h3>Available Balance</h3>
@@ -124,10 +151,21 @@ body{
     </div>
   </div>
 
+  <!-- Budget Remaining Bar -->
+  <div class="budget-wrap">
+    <div class="budget-labels">
+      <span id="budgetUsedLabel">Used: –%</span>
+      <span id="budgetRemainLabel">Remaining: –%</span>
+    </div>
+    <div class="budget-bar-bg">
+      <div class="budget-bar-used" id="budgetUsedBar"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
-/* Today’s Date */
+/* Today's Date */
 const d = new Date();
 todayDate.innerText = d.toLocaleDateString("en-IN", {
   day:"2-digit",
@@ -135,10 +173,48 @@ todayDate.innerText = d.toLocaleDateString("en-IN", {
   year:"numeric"
 });
 
-/* Placeholder values (will be wired later) */
-kBalance.innerText = "₹22,768";
-kExpense.innerText = "₹14,447";
-kBurn.innerText = "63%";
+/* Google Sheet Config */
+const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+const KPI_SHEET = "Dashboard_KPIs";
+
+function fetchSheet(sheet){
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}`;
+  return fetch(url)
+    .then(res => res.text())
+    .then(text => JSON.parse(text.substring(47).slice(0,-2)));
+}
+
+/* Load KPIs */
+async function loadKPIs(){
+  const data = await fetchSheet(KPI_SHEET);
+  const rows = data.table.rows;
+
+  let balance = 0;
+  let expense = 0;
+  let burnPct = 0;
+
+  rows.forEach(r=>{
+    const k = r.c[0]?.v;
+    const v = r.c[1]?.v;
+
+    if(k==="Total Balance (All Accounts)") balance = v;
+    if(k==="Current Month Expenses") expense = v;
+    if(k==="Budget Used %") burnPct = v;
+  });
+
+  const used = Math.round(burnPct * 100);
+  const remaining = 100 - used;
+
+  kBalance.innerText = "₹" + balance.toLocaleString("en-IN");
+  kExpense.innerText = "₹" + expense.toLocaleString("en-IN");
+  kBurn.innerText = used + "%";
+
+  budgetUsedBar.style.width = used + "%";
+  budgetUsedLabel.innerText = "Used: " + used + "%";
+  budgetRemainLabel.innerText = "Remaining: " + remaining + "%";
+}
+
+loadKPIs();
 </script>
 
 </body>
