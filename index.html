@@ -17,16 +17,13 @@
   --good:#2fa36b;
   --warn:#e5533d;
 }
-
 *{box-sizing:border-box}
-
 body{
   margin:0;
   font-family:Inter,system-ui,-apple-system,sans-serif;
   background:var(--bg);
   color:var(--text);
 }
-
 header{
   position:sticky;
   top:0;
@@ -38,23 +35,13 @@ header{
   align-items:center;
   z-index:10;
 }
-
-header h1{
-  font-size:20px;
-  margin:0;
-}
-
-header small{
-  color:var(--muted);
-  font-size:13px;
-}
-
+header h1{font-size:20px;margin:0}
+header small{color:var(--muted);font-size:13px}
 .container{
   max-width:1200px;
   margin:auto;
   padding:24px;
 }
-
 .toggle{
   display:inline-flex;
   background:#ebe7db;
@@ -62,7 +49,6 @@ header small{
   overflow:hidden;
   margin-bottom:20px;
 }
-
 .toggle button{
   padding:8px 18px;
   border:none;
@@ -71,37 +57,31 @@ header small{
   cursor:pointer;
   color:#555;
 }
-
 .toggle button.active{
   background:var(--accent);
   color:white;
 }
-
 .kpis{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
   gap:16px;
 }
-
 .card{
   background:var(--card);
   padding:18px;
   border-radius:16px;
   box-shadow:0 8px 24px rgba(0,0,0,.05);
 }
-
 .card h3{
   font-size:13px;
   color:var(--muted);
   margin:0;
 }
-
 .card p{
   font-size:22px;
   font-weight:700;
   margin:6px 0 0;
 }
-
 .bar{
   margin:28px 0;
   background:#e4e1d8;
@@ -109,54 +89,36 @@ header small{
   border-radius:10px;
   overflow:hidden;
 }
-
 .bar-inner{
   height:100%;
   width:0%;
   background:linear-gradient(90deg,var(--accent),#67d4a2);
   transition:width .6s ease;
 }
-
-.section{
-  margin-top:28px;
-}
-
-.section h2{
-  font-size:16px;
-  margin-bottom:12px;
-}
-
+.section{margin-top:28px}
+.section h2{font-size:16px;margin-bottom:12px}
 canvas{
   background:white;
   border-radius:16px;
   padding:18px;
 }
-
-ul{
-  padding-left:18px;
-  margin:10px 0;
-}
-
+ul{padding-left:18px;margin:10px 0}
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:14px;
 }
-
 th,td{
   padding:10px 6px;
   border-bottom:1px solid #eee;
 }
-
 th{
   text-align:left;
   font-size:13px;
   color:var(--muted);
 }
-
 .status-low{color:var(--warn);font-weight:600}
 .status-ok{color:var(--good);font-weight:600}
-
 footer{
   text-align:center;
   padding:24px;
@@ -227,10 +189,12 @@ footer{
 
 <script>
 const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+
 const today=new Date();
 const month=today.toISOString().slice(0,7);
 const yearStart=today.getFullYear()+"-01";
 let mode="MONTH";
+
 document.getElementById("today").innerText=
 today.toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
 
@@ -286,8 +250,10 @@ async function load(){
   chart=new Chart(trend,{
     type:"line",
     data:{labels,datasets:[{data,borderColor:"#2f5bea",tension:.35}]},
-    options:{plugins:{legend:{display:false}},
-    scales:{x:{grid:{display:false}},y:{grid:{display:false}}}}
+    options:{
+      plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false}},y:{grid:{display:false}}}
+    }
   });
 
   insights.innerHTML="";
