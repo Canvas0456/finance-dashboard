@@ -9,305 +9,311 @@
 
 <style>
 :root{
-  --bg:#f8f5f0;
-  --card:#fffdf9;
-  --border:#e7e2d9;
-  --text:#2f2f2f;
-  --muted:#7a746b;
-  --accent:#8b7d6b;
+  --bg:#faf8f2;
+  --card:#ffffff;
+  --text:#2e2e2e;
+  --muted:#7a7a7a;
+  --accent:#9c8b6a;
 }
 
-*{box-sizing:border-box}
 body{
   margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
   background:var(--bg);
-  font-family:system-ui,-apple-system;
   color:var(--text);
 }
 
-/* HEADER */
-.header{
-  position:fixed;
-  top:0; left:0; right:0;
-  background:var(--card);
-  border-bottom:1px solid var(--border);
-  padding:12px 16px;
-  z-index:1000;
+header{
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  padding:16px 20px;
+  border-bottom:1px solid #e6e2d8;
+  z-index:10;
 }
-.header-top{
+
+.header-row{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  align-items:flex-start;
 }
-.title{font-size:17px;font-weight:600}
-.date{font-size:13px;color:var(--muted)}
-.subtitle{font-size:12px;color:var(--muted);margin-top:4px}
 
-/* CONTENT */
-.container{padding:110px 14px 30px}
+h1{
+  margin:0;
+  font-size:22px;
+}
 
-/* THOUGHT */
-.thought{
-  background:var(--card);
-  border:1px dashed var(--border);
-  border-radius:12px;
-  padding:12px;
+.subtitle{
   font-size:13px;
   color:var(--muted);
-  margin-bottom:16px;
+  margin-top:4px;
 }
 
-/* TOGGLES */
+.date{
+  font-size:14px;
+  color:var(--muted);
+}
+
+.container{
+  padding:20px;
+  max-width:1100px;
+  margin:auto;
+}
+
+.thought{
+  border:1px dashed #ddd6c9;
+  padding:12px;
+  border-radius:12px;
+  color:var(--muted);
+  margin-bottom:20px;
+  font-size:14px;
+}
+
 .toggle{
   display:flex;
   gap:8px;
-  margin-bottom:16px;
+  margin-bottom:20px;
 }
+
 .toggle button{
-  flex:1;
-  padding:8px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:var(--card);
-  font-size:13px;
+  border:1px solid #d6cfbf;
+  background:white;
+  padding:8px 14px;
+  border-radius:20px;
   cursor:pointer;
 }
+
 .toggle button.active{
-  background:#efe9e1;
-  border-color:var(--accent);
+  background:var(--accent);
+  color:white;
 }
 
-/* KPI */
-.kpi-grid{
+.kpis{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.kpi{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-}
-.kpi h3{
-  margin:0;
-  font-size:12px;
-  color:var(--muted);
-}
-.kpi p{
-  margin-top:6px;
-  font-size:20px;
-  font-weight:600;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
 }
 
-/* BUDGET BAR */
-.budget{margin-top:16px}
-.budget-labels{
-  display:flex;
-  justify-content:space-between;
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:6px;
+.card{
+  background:var(--card);
+  border-radius:18px;
+  padding:16px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.04);
 }
-.bar-bg{
+
+.card h3{
+  margin:0;
+  font-size:14px;
+  color:var(--muted);
+}
+
+.card .value{
+  font-size:26px;
+  font-weight:600;
+  margin-top:6px;
+}
+
+.bar-wrap{
+  margin-top:20px;
+}
+
+.bar{
   height:10px;
-  background:#e7e2d9;
-  border-radius:999px;
+  background:#e8e3d8;
+  border-radius:6px;
   overflow:hidden;
 }
-.bar-used{
+
+.bar span{
+  display:block;
   height:100%;
   background:var(--accent);
-  width:0%;
 }
 
-/* ACCOUNTS */
-.section-title{
-  margin-top:22px;
-  margin-bottom:8px;
-  font-size:14px;
-  font-weight:600;
-}
-.account-list{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
-}
-.account-row{
+.bar-label{
   display:flex;
   justify-content:space-between;
-  padding:12px 14px;
-  border-bottom:1px solid var(--border);
-  font-size:14px;
-}
-.account-row:last-child{border-bottom:none}
-.account-name{color:var(--muted)}
-.account-amt{font-weight:600}
-
-/* CHART */
-.chart-card{
-  margin-top:22px;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-}
-.chart-caption{
-  font-size:11px;
-  color:var(--muted);
+  font-size:13px;
   margin-top:6px;
+  color:var(--muted);
+}
+
+.section{
+  margin-top:32px;
+}
+
+.section h2{
+  font-size:18px;
+  margin-bottom:12px;
+}
+
+.accounts{
+  background:white;
+  border-radius:16px;
+  overflow:hidden;
+}
+
+.accounts div{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 16px;
+  border-bottom:1px solid #f0ede5;
+}
+
+.accounts div:last-child{border-bottom:none;}
+
+canvas{
+  background:white;
+  border-radius:16px;
+  padding:12px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-  <div class="header-top">
-    <div class="title">Kaiwalya’s Finance Dashboard</div>
+<header>
+  <div class="header-row">
+    <div>
+      <h1>Kaiwalya’s Finance Dashboard</h1>
+      <div class="subtitle">“Calm tracking leads to better decisions.”</div>
+    </div>
     <div class="date" id="todayDate"></div>
   </div>
-  <div class="subtitle">“Calm tracking leads to better decisions.”</div>
-</div>
+</header>
 
 <div class="container">
 
-  <div class="thought" id="thought">Loading today’s thought…</div>
+<div class="thought" id="thoughtBox">Loading today’s thought…</div>
 
-  <div class="toggle">
-    <button id="btnMonth" class="active">Month</button>
-    <button id="btnYTD">YTD</button>
+<div class="toggle">
+  <button id="monthBtn" class="active">Month</button>
+  <button id="ytdBtn">YTD</button>
+</div>
+
+<div class="kpis">
+  <div class="card"><h3>Total Balance</h3><div class="value" id="bal">—</div></div>
+  <div class="card"><h3>Total Expenses</h3><div class="value" id="exp">—</div></div>
+  <div class="card"><h3>Budget Remaining</h3><div class="value" id="remain">—</div></div>
+  <div class="card"><h3>Budget Burn %</h3><div class="value" id="burn">—</div></div>
+</div>
+
+<div class="bar-wrap">
+  <div class="bar"><span id="burnBar"></span></div>
+  <div class="bar-label">
+    <span id="usedLbl">Used: 0%</span>
+    <span id="remLbl">Remaining: 100%</span>
   </div>
+</div>
 
-  <div class="kpi-grid">
-    <div class="kpi"><h3>Total Balance</h3><p id="kBalance">–</p></div>
-    <div class="kpi"><h3>Total Expenses</h3><p id="kExpense">–</p></div>
-    <div class="kpi"><h3>Budget Remaining</h3><p id="kRemain">–</p></div>
-    <div class="kpi"><h3>Budget Burn %</h3><p id="kBurn">–%</p></div>
-  </div>
+<div class="section">
+  <h2>Account Balances</h2>
+  <div class="accounts" id="accounts"></div>
+</div>
 
-  <div class="budget">
-    <div class="budget-labels">
-      <span id="usedLabel">Used: –%</span>
-      <span id="remainLabel">Remaining: –%</span>
-    </div>
-    <div class="bar-bg"><div class="bar-used" id="budgetBar"></div></div>
-  </div>
-
-  <div class="section-title">Account Balances</div>
-  <div class="account-list" id="accounts"></div>
-
-  <div class="chart-card">
-    <canvas id="trendChart" height="140"></canvas>
-    <div class="chart-caption" id="chartCaption"></div>
-  </div>
+<div class="section">
+  <h2>Expense Trend</h2>
+  <canvas id="trendChart" height="120"></canvas>
+  <div class="subtitle" id="chartCaption"></div>
+</div>
 
 </div>
 
 <script>
-const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
-todayDate.innerText=new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
+const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
 
-/* Thought */
-fetch("https://api.allorigins.win/raw?url=https://zenquotes.io/api/today")
+const today = new Date();
+document.getElementById("todayDate").innerText =
+  today.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+
+fetch("https://api.quotable.io/random")
 .then(r=>r.json())
-.then(d=>thought.innerText=d[0].q)
-.catch(()=>thought.innerText="Consistency is more powerful than intensity.");
+.then(d=>document.getElementById("thoughtBox").innerText=d.content)
+.catch(()=>document.getElementById("thoughtBox").innerText="Stay consistent. Money follows clarity.");
 
-/* Fetch helper */
 function fetchSheet(sheet){
-  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}`)
+  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`)
     .then(r=>r.text())
-    .then(t=>JSON.parse(t.substring(47).slice(0,-2)));
+    .then(t=>JSON.parse(t.substr(47).slice(0,-2)));
 }
 
 /* KPIs */
 fetchSheet("Dashboard_KPIs").then(d=>{
-  let bal=0, exp=0, burn=0;
-  d.table.rows.forEach(r=>{
-    const k=r.c[0]?.v, v=r.c[1]?.v;
-    if(k==="Total Balance (All Accounts)") bal=v;
-    if(k==="Current Month Expenses") exp=v;
-    if(k==="Budget Used %") burn=v;
-  });
-  const used=Math.round(burn*100), rem=100-used;
-  kBalance.innerText="₹"+bal.toLocaleString("en-IN");
-  kExpense.innerText="₹"+exp.toLocaleString("en-IN");
-  kBurn.innerText=used+"%";
-  kRemain.innerText="₹"+(bal-exp).toLocaleString("en-IN");
-  budgetBar.style.width=used+"%";
-  usedLabel.innerText="Used: "+used+"%";
-  remainLabel.innerText="Remaining: "+rem+"%";
+  const rows=d.table.rows;
+  const val=k=>rows.find(r=>r.c[0]?.v===k)?.c[1]?.v||0;
+  document.getElementById("bal").innerText="₹"+val("Total Balance (All Accounts)").toLocaleString();
+  document.getElementById("exp").innerText="₹"+val("Current Month Expenses").toLocaleString();
+  const remain = val("Total Balance (All Accounts)") - val("Current Month Expenses");
+  document.getElementById("remain").innerText="₹"+remain.toLocaleString();
+  const burn=Math.round(val("Budget Used %")*100);
+  document.getElementById("burn").innerText=burn+"%";
+  document.getElementById("burnBar").style.width=burn+"%";
+  document.getElementById("usedLbl").innerText="Used: "+burn+"%";
+  document.getElementById("remLbl").innerText="Remaining: "+(100-burn)+"%";
 });
 
 /* Accounts */
 fetchSheet("Account_Balances_Live").then(d=>{
+  const wrap=document.getElementById("accounts");
   d.table.rows.forEach(r=>{
-    if(!r.c[0]?.v) return;
-    accounts.innerHTML+=`
-      <div class="account-row">
-        <div class="account-name">${r.c[0].v}</div>
-        <div class="account-amt">₹${r.c[4].v.toLocaleString("en-IN")}</div>
-      </div>`;
+    wrap.innerHTML+=`<div><span>${r.c[0].v}</span><strong>₹${r.c[4].v.toLocaleString()}</strong></div>`;
   });
 });
 
-/* Trend Chart */
-const ctx=document.getElementById("trendChart");
-let chart=new Chart(ctx,{
+/* Trend */
+let rows=[];
+const ctx=document.getElementById("trendChart").getContext("2d");
+const chart=new Chart(ctx,{
   type:"line",
-  data:{labels:[],datasets:[{data:[],borderColor:"#8b7d6b",tension:.4,pointRadius:4}]},
+  data:{labels:[],datasets:[{data:[],borderColor:"#9c8b6a",tension:.4,fill:false}]},
   options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{display:false}}}}
 });
 
-/* REAL DATA FROM Txn_Clean */
 fetchSheet("Txn_Clean").then(d=>{
-  const rows=d.table.rows;
-  const currentMonth=new Date().toISOString().slice(0,7);
-
-  function showMonth(){
-    const weeks=[0,0,0,0,0];
-    rows.forEach(r=>{
-      if(!r.c[4]||!r.c[11]?.v) return;
-      if(r.c[3].v!==currentMonth) return;
-      const date=new Date(Math.round((r.c[1].v-25569)*86400*1000));
-      const wk=Math.min(4,Math.ceil(date.getDate()/7))-1;
-      weeks[wk]+=Math.abs(r.c[4].v);
-    });
-    chart.data.labels=["W1","W2","W3","W4","W5"];
-    chart.data.datasets[0].data=weeks;
-    chart.update();
-    chartCaption.innerText="Weekly expense trend (current month)";
-  }
-
-  function showYTD(){
-    const months=Array(12).fill(0);
-    rows.forEach(r=>{
-      if(!r.c[4]||!r.c[11]?.v) return;
-      const m=parseInt(r.c[3].v.slice(5,7))-1;
-      months[m]+=Math.abs(r.c[4].v);
-    });
-    chart.data.labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    chart.data.datasets[0].data=months;
-    chart.update();
-    chartCaption.innerText="Monthly expense trend (YTD)";
-  }
-
+  rows=d.table.rows;
   showMonth();
-
-  btnMonth.onclick=()=>{
-    btnMonth.classList.add("active");
-    btnYTD.classList.remove("active");
-    showMonth();
-  };
-
-  btnYTD.onclick=()=>{
-    btnYTD.classList.add("active");
-    btnMonth.classList.remove("active");
-    showYTD();
-  };
 });
+
+function showMonth(){
+  const weeks=[0,0,0,0,0];
+  const month=today.toISOString().slice(0,7);
+  const todaySerial=Math.floor(today/86400000)+25569;
+
+  rows.forEach(r=>{
+    if(!r.c[11]?.v) return;
+    if(r.c[3].v!==month) return;
+    if(r.c[1].v>todaySerial) return;
+    const day=new Date((r.c[1].v-25569)*86400000).getDate();
+    weeks[Math.min(4,Math.floor((day-1)/7))]+=Math.abs(r.c[4].v);
+  });
+
+  chart.data.labels=["W1","W2","W3","W4","W5"];
+  chart.data.datasets[0].data=weeks;
+  chart.update();
+  chartCaption.innerText="Weekly expenses — current month";
+}
+
+function showYTD(){
+  const months=Array(12).fill(0);
+  const yearStart=Math.floor(new Date(today.getFullYear(),0,1)/86400000)+25569;
+  const todaySerial=Math.floor(today/86400000)+25569;
+
+  rows.forEach(r=>{
+    if(!r.c[11]?.v) return;
+    if(r.c[1].v<yearStart||r.c[1].v>todaySerial) return;
+    const m=new Date((r.c[1].v-25569)*86400000).getMonth();
+    months[m]+=Math.abs(r.c[4].v);
+  });
+
+  const m=today.getMonth();
+  chart.data.labels=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].slice(0,m+1);
+  chart.data.datasets[0].data=months.slice(0,m+1);
+  chart.update();
+  chartCaption.innerText="Monthly expenses — YTD till today";
+}
+
+monthBtn.onclick=()=>{monthBtn.classList.add("active");ytdBtn.classList.remove("active");showMonth();}
+ytdBtn.onclick=()=>{ytdBtn.classList.add("active");monthBtn.classList.remove("active");showYTD();}
 </script>
 
 </body>
