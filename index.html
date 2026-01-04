@@ -1,279 +1,1151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kaiwalya’s Finance Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Kaiwalya’s Finance Dashboard</title>
 
-<style>
-:root{
-  --bg:#faf7f2;
-  --card:#ffffff;
-  --text:#2b2b2b;
-  --muted:#7a7a7a;
-  --accent:#4a6cf7;
-  --danger:#e5533d;
-  --warn:#f0a500;
-  --success:#2e9e6f;
-}
+  <!-- Google Font (Finance-friendly, calm) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-*{box-sizing:border-box}
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:var(--bg);
-  color:var(--text);
-}
+  <!-- ===== THEME & BASE STYLES ===== -->
+  <style>
+    :root {
+      /* Ivory finance palette */
+      --bg-main: #fbfaf6;
+      --bg-card: #ffffff;
+      --bg-soft: #f2efe8;
 
-/* HEADER */
-header{
-  position:fixed;
-  top:0;left:0;right:0;
-  background:var(--bg);
-  padding:16px 24px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  border-bottom:1px solid #e6e1d8;
-  z-index:100;
-}
+      --text-primary: #1f2933;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
 
-header h1{
-  margin:0;
-  font-size:22px;
-  font-weight:600;
-}
+      --accent-primary: #4f6df5;
+      --accent-soft: #dbe3ff;
 
-.subtitle{
-  font-size:13px;
-  color:var(--muted);
-}
+      --success: #1f9d55;
+      --warning: #f59e0b;
+      --danger: #dc2626;
 
-.date{
-  font-size:14px;
-  color:var(--muted);
-}
+      --border-light: #e5e7eb;
+      --shadow-soft: 0 10px 30px rgba(0,0,0,0.04);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
 
-/* MAIN */
-main{
-  padding:120px 20px 40px;
-  max-width:1200px;
-  margin:auto;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-/* TOGGLE */
-.toggle{
-  display:flex;
-  gap:8px;
-  margin-bottom:20px;
-}
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.4;
+      padding-bottom: 80px;
+    }
 
-.toggle button{
-  padding:6px 16px;
-  border-radius:20px;
-  border:1px solid #ddd;
-  background:#fff;
-  cursor:pointer;
-}
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
 
-.toggle button.active{
-  background:var(--accent);
-  color:#fff;
-  border-color:var(--accent);
-}
+    /* Utility classes */
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-soft);
+      padding: 20px;
+    }
 
-/* CARDS */
-.kpis{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:16px;
-}
+    .muted {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
 
-.card{
-  background:var(--card);
-  border-radius:14px;
-  padding:18px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.04);
-}
+    .hidden {
+      display: none;
+    }
 
-.card h3{
-  margin:0;
-  font-size:13px;
-  color:var(--muted);
-}
+    /* Smooth UI */
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
 
-.card p{
-  margin:8px 0 0;
-  font-size:22px;
-  font-weight:600;
-}
-
-/* BUDGET BAR */
-.budget{
-  margin-top:24px;
-}
-
-.bar{
-  height:14px;
-  background:#e6e1d8;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.bar-fill{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,var(--accent),#7aa2ff);
-  transition:width 1s ease;
-}
-
-.bar-label{
-  display:flex;
-  justify-content:space-between;
-  font-size:12px;
-  margin-top:6px;
-  color:var(--muted);
-}
-
-/* THOUGHT */
-.thought{
-  margin-top:24px;
-  font-style:italic;
-  font-size:14px;
-  color:#555;
-}
-
-/* CHARTS */
-.section{
-  margin-top:40px;
-}
-
-canvas{
-  background:var(--card);
-  border-radius:14px;
-  padding:16px;
-}
-</style>
+    /* Prevent scroll jump when toggles change */
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-  <div>
-    <h1>Kaiwalya’s Finance Dashboard</h1>
-    <div class="subtitle">Clarity over cash. Control over chaos.</div>
+  <!-- CONTENT STARTS IN NEXT PART -->
+  <!-- ===== HEADER ===== -->
+<header style="
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-main);
+  border-bottom: 1px solid var(--border-light);
+">
+  <div class="container" style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 18px;
+    padding-bottom: 18px;
+  ">
+
+    <!-- Title + Subtitle -->
+    <div>
+      <h1 style="
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      ">
+        Kaiwalya’s Finance Dashboard
+      </h1>
+      <p class="muted" style="margin-top: 4px;">
+        Clarity over cash. Control over chaos.
+      </p>
+    </div>
+
+    <!-- Date (Fixed, non-scrollable feeling) -->
+    <div style="
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    " id="todayDate">
+      <!-- Filled by JS -->
+    </div>
+
   </div>
-  <div class="date" id="today"></div>
 </header>
 
-<main>
+<!-- ===== MODE TOGGLE ===== -->
+<section class="container" style="margin-top: 18px;">
+  <div style="
+    display: flex;
+    gap: 8px;
+    background: var(--bg-soft);
+    padding: 6px;
+    border-radius: 999px;
+    width: fit-content;
+  ">
 
-<div class="toggle">
-  <button id="btnMonth" class="active">Month</button>
-  <button id="btnYTD">YTD</button>
-</div>
+    <button
+      id="toggleMonth"
+      class="toggle-btn active"
+      style="
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        background: var(--accent-primary);
+        color: white;
+      "
+      onclick="setMode('MONTH')"
+    >
+      Month
+    </button>
 
-<!-- KPI CARDS -->
-<div class="kpis">
-  <div class="card"><h3>Total Balance</h3><p id="bal">—</p></div>
-  <div class="card"><h3>Total Expenses</h3><p id="exp">—</p></div>
-  <div class="card"><h3>Budget Burn %</h3><p id="burn">—</p></div>
-  <div class="card"><h3>Budget Remaining</h3><p id="rem">—</p></div>
-</div>
+    <button
+      id="toggleYTD"
+      class="toggle-btn"
+      style="
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        background: transparent;
+        color: var(--text-secondary);
+      "
+      onclick="setMode('YTD')"
+    >
+      YTD
+    </button>
 
-<!-- BUDGET BAR -->
-<div class="budget card">
-  <div class="bar">
-    <div class="bar-fill" id="budgetBar"></div>
   </div>
-  <div class="bar-label">
-    <span id="usedLabel">Used —%</span>
-    <span id="remLabel">Remaining ₹—</span>
-  </div>
-</div>
+</section>
 
-<!-- THOUGHT -->
-<div class="thought" id="thought">Loading thought of the day…</div>
-
-<!-- EXPENSE TREND -->
-<div class="section">
-  <canvas id="trendChart" height="130"></canvas>
-</div>
-
-<!-- CATEGORY -->
-<div class="section">
-  <canvas id="categoryChart" height="130"></canvas>
-</div>
-
-</main>
-
+<!-- ===== HEADER SCRIPTS ===== -->
 <script>
-const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
-let mode = "Month";
+  /* Set today's date */
+  const today = new Date();
+  const options = { day: '2-digit', month: 'short', year: 'numeric' };
+  document.getElementById('todayDate').innerText =
+    today.toLocaleDateString('en-IN', options);
 
-document.getElementById("today").innerText =
-  new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+  /* Toggle logic (visual only for now) */
+  let MODE = 'MONTH';
 
-function fetchSheet(sheet){
-  return fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}`)
-    .then(r=>r.text())
-    .then(t=>JSON.parse(t.substring(47).slice(0,-2)).table.rows);
-}
+  function setMode(mode) {
+    MODE = mode;
 
-/* Thought of the Day */
-fetch("https://api.quotable.io/random?tags=wisdom|inspirational")
-  .then(r=>r.json())
-  .then(d=>document.getElementById("thought").innerText="“"+d.content+"”");
+    const monthBtn = document.getElementById('toggleMonth');
+    const ytdBtn = document.getElementById('toggleYTD');
 
-/* Toggle */
-btnMonth.onclick=()=>{mode="Month";btnMonth.classList.add("active");btnYTD.classList.remove("active");load()};
-btnYTD.onclick=()=>{mode="YTD";btnYTD.classList.add("active");btnMonth.classList.remove("active");load()};
+    if (mode === 'MONTH') {
+      monthBtn.style.background = 'var(--accent-primary)';
+      monthBtn.style.color = '#fff';
+      ytdBtn.style.background = 'transparent';
+      ytdBtn.style.color = 'var(--text-secondary)';
+    } else {
+      ytdBtn.style.background = 'var(--accent-primary)';
+      ytdBtn.style.color = '#fff';
+      monthBtn.style.background = 'transparent';
+      monthBtn.style.color = 'var(--text-secondary)';
+    }
 
-let trendChart, categoryChart;
+    // Data wiring will come later
+    console.log('Mode switched to:', MODE);
+  }
+</script>
 
-function load(){
-  const sheet = mode==="Month" ? "Dashboard_KPIs_Month" : "Dashboard_KPIs_YTD";
+  <!-- ===== THOUGHT OF THE DAY ===== -->
+<section class="container" style="margin-top: 22px;">
 
-  fetchSheet(sheet).then(rows=>{
-    const d={};
-    rows.forEach(r=>{if(r.c[0]&&r.c[1]) d[r.c[0].v]=r.c[1].v});
+  <div style="
+    background: var(--bg-card);
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+  ">
 
-    document.getElementById("bal").innerText="₹"+d["Total Balance (All Accounts)"];
-    document.getElementById("exp").innerText="₹"+(mode==="Month"?d["Current Month Expenses"]:d["YTD Expenses"]);
+    <p
+      id="thoughtOfDay"
+      style="
+        font-size: 14px;
+        line-height: 1.5;
+        font-style: italic;
+        color: var(--text-secondary);
+      "
+    >
+      Loading today’s thought…
+    </p>
 
-    const burn = (mode==="Month"?d["Budget Used %"]:d["YTD Budget Used %"])*100;
-    document.getElementById("burn").innerText=burn.toFixed(1)+"%";
-    document.getElementById("rem").innerText="₹"+(mode==="Month"?d["Budget Remaining"]:d["YTD Budget Remaining"]);
+  </div>
 
-    document.getElementById("budgetBar").style.width=Math.min(burn,100)+"%";
-    document.getElementById("usedLabel").innerText="Used "+burn.toFixed(1)+"%";
-    document.getElementById("remLabel").innerText="Remaining ₹"+(mode==="Month"?d["Budget Remaining"]:d["YTD Budget Remaining"]);
-  });
+</section>
 
-  /* Category Chart */
-  fetchSheet("Budget_vs_Actual").then(rows=>{
-    const labels=[], values=[];
-    rows.forEach(r=>{
-      if(r.c[6].v === (mode==="Month" ? document.getElementById("bal").innerText : r.c[6].v)){
-        labels.push(r.c[1].v);
-        values.push(r.c[3].v);
+<!-- ===== THOUGHT SCRIPT ===== -->
+<script>
+  async function loadThought() {
+    const thoughtBox = document.getElementById("thoughtOfDay");
+
+    try {
+      /* Free public quote API */
+      const res = await fetch("https://api.quotable.io/random?tags=wisdom|inspirational");
+      const data = await res.json();
+
+      thoughtBox.innerHTML = `“${data.content}” <span style="opacity:0.6;">— ${data.author}</span>`;
+    } catch (e) {
+      /* Calm fallback (no scary errors) */
+      thoughtBox.innerHTML =
+        "“Small, consistent decisions compound into financial peace.”";
+    }
+  }
+
+  loadThought();
+</script>
+
+  
+<!-- ===== KPI CARDS ===== -->
+<section class="container" style="margin-top: 26px;">
+
+  <div style="
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  ">
+
+    <div class="card">
+      <h3 class="muted">Total Balance</h3>
+      <p id="kpiBalance" style="font-size: 24px; font-weight: 700;">—</p>
+    </div>
+
+    <div class="card">
+      <h3 class="muted">Total Expenses</h3>
+      <p id="kpiExpenses" style="font-size: 24px; font-weight: 700;">—</p>
+    </div>
+
+    <div class="card">
+      <h3 class="muted">Budget Burn %</h3>
+      <p id="kpiBurn" style="font-size: 24px; font-weight: 700;">—</p>
+    </div>
+
+    <div class="card">
+      <h3 class="muted">Budget Remaining</h3>
+      <p id="kpiRemaining" style="font-size: 24px; font-weight: 700;">—</p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ===== KPI DATA SCRIPT ===== -->
+<script>
+  const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+
+  function formatINR(value) {
+    return "₹" + Number(value || 0).toLocaleString("en-IN");
+  }
+
+  function fetchSheet(sheetName) {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheetName}`;
+    return fetch(url)
+      .then(res => res.text())
+      .then(text => JSON.parse(text.substring(47).slice(0, -2)).table.rows);
+  }
+
+  async function loadKPIs() {
+    const sheetName =
+      MODE === "MONTH" ? "Dashboard_KPIs_Month" : "Dashboard_KPIs_YTD";
+
+    const rows = await fetchSheet(sheetName);
+
+    const data = {};
+    rows.forEach(r => {
+      if (r.c[0] && r.c[1]) {
+        data[r.c[0].v] = r.c[1].v;
       }
     });
 
-    if(categoryChart) categoryChart.destroy();
-    categoryChart=new Chart(document.getElementById("categoryChart"),{
-      type:"doughnut",
-      data:{labels,datasets:[{data:values,backgroundColor:["#4a6cf7","#f0a500","#2e9e6f","#e5533d"]}]},
-      options:{plugins:{legend:{position:"bottom"}}}
-    });
-  });
-}
+    document.getElementById("kpiBalance").innerText =
+      formatINR(data["Total Balance (All Accounts)"]);
 
-load();
+    document.getElementById("kpiExpenses").innerText =
+      formatINR(
+        MODE === "MONTH"
+          ? data["Current Month Expenses"]
+          : data["YTD Expenses"]
+      );
+
+    const burnPct =
+      MODE === "MONTH"
+        ? data["Budget Used %"]
+        : data["YTD Budget Used %"];
+
+    document.getElementById("kpiBurn").innerText =
+      (burnPct * 100).toFixed(2) + "%";
+
+    document.getElementById("kpiRemaining").innerText =
+      formatINR(
+        MODE === "MONTH"
+          ? data["Budget Remaining"]
+          : data["YTD Budget Remaining"]
+      );
+  }
+
+  /* Hook KPIs to toggle */
+  const originalSetMode = setMode;
+  setMode = function(mode) {
+    originalSetMode(mode);
+    loadKPIs();
+  };
+
+  /* Initial load */
+  loadKPIs();
 </script>
 
+  <!-- ===== BUDGET UTILISATION BAR ===== -->
+<section class="container" style="margin-top: 28px;">
+
+  <div class="card">
+
+    <div style="margin-bottom: 10px;">
+      <span class="muted">Budget Utilisation</span>
+    </div>
+
+    <!-- Progress Bar -->
+    <div style="
+      width: 100%;
+      height: 14px;
+      background: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    ">
+      <div
+        id="budgetBarFill"
+        style="
+          height: 100%;
+          width: 0%;
+          background: linear-gradient(
+            90deg,
+            var(--accent-primary),
+            #8aa0ff
+          );
+          transition: width 1.2s ease;
+        "
+      ></div>
+    </div>
+
+    <!-- Labels -->
+    <div style="
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    ">
+      <span id="budgetUsedLabel">—</span>
+      <span id="budgetRemainingLabel">—</span>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ===== BUDGET BAR SCRIPT ===== -->
+<script>
+  async function loadBudgetBar() {
+    const sheetName =
+      MODE === "MONTH" ? "Dashboard_KPIs_Month" : "Dashboard_KPIs_YTD";
+
+    const rows = await fetchSheet(sheetName);
+    const data = {};
+
+    rows.forEach(r => {
+      if (r.c[0] && r.c[1]) {
+        data[r.c[0].v] = r.c[1].v;
+      }
+    });
+
+    const usedPct =
+      MODE === "MONTH"
+        ? data["Budget Used %"]
+        : data["YTD Budget Used %"];
+
+    const remaining =
+      MODE === "MONTH"
+        ? data["Budget Remaining"]
+        : data["YTD Budget Remaining"];
+
+    const totalBudget =
+      remaining / (1 - usedPct || 1);
+
+    const spent = totalBudget - remaining;
+
+    const pct = Math.min(usedPct * 100, 100);
+
+    document.getElementById("budgetBarFill").style.width = pct + "%";
+
+    document.getElementById("budgetUsedLabel").innerText =
+      formatINR(Math.round(spent)) +
+      " spent of " +
+      formatINR(Math.round(totalBudget));
+
+    document.getElementById("budgetRemainingLabel").innerText =
+      "Remaining " + formatINR(Math.round(remaining));
+  }
+
+  /* Attach to toggle */
+  const originalLoadKPIs = loadKPIs;
+  loadKPIs = async function() {
+    await originalLoadKPIs();
+    loadBudgetBar();
+  };
+
+  /* Initial load */
+  loadBudgetBar();
+</script>
+
+  <!-- ===== EXPENSE TREND ===== -->
+<section class="container" style="margin-top: 34px;">
+  <div class="card">
+    <canvas id="expenseTrend" height="140"></canvas>
+  </div>
+</section>
+
+<script>
+let trendChart;
+
+/* Helpers */
+function getISOWeek(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+function destroyTrend(){
+  if(trendChart){ trendChart.destroy(); trendChart = null; }
+}
+
+/* Load Trend */
+async function loadTrend(){
+  destroyTrend();
+
+  if(MODE === "MONTH"){
+    // -------- MONTH: Weekly actuals from Txn_Clean --------
+    const rows = await fetchSheet("Txn_Clean");
+    const now = new Date();
+    const ym = now.toISOString().slice(0,7);
+
+    const weekly = {};
+    rows.forEach(r=>{
+      const m = r.c[3]?.v;           // Effective_Month
+      const amt = r.c[9]?.v || 0;    // Signed_Amount
+      if(m === ym && amt < 0){
+        const d = new Date(r.c[1].v);
+        const w = getISOWeek(d);
+        weekly[w] = (weekly[w] || 0) + Math.abs(amt);
+      }
+    });
+
+    const weeks = Object.keys(weekly).sort((a,b)=>a-b);
+    const values = weeks.map(w=>Math.round(weekly[w]));
+
+    trendChart = new Chart(
+      document.getElementById("expenseTrend"),
+      {
+        type:"line",
+        data:{
+          labels: weeks.map(w=>"W"+w),
+          datasets:[{
+            data: values,
+            borderColor: "#4f6df5",
+            tension: 0.35,
+            pointRadius: 3
+          }]
+        },
+        options:{
+          plugins:{legend:{display:false}},
+          scales:{
+            x:{grid:{display:false}, title:{display:true, text:"Weeks (Current Month)"}},
+            y:{grid:{display:false}}
+          }
+        }
+      }
+    );
+
+  } else {
+    // -------- YTD: Monthly actuals + forecast --------
+    const rows = await fetchSheet("Category_Monthly_Actuals");
+    const map = {};
+
+    rows.forEach(r=>{
+      const m = r.c[0]?.v;
+      const amt = r.c[2]?.v || 0;
+      map[m] = (map[m] || 0) + amt;
+    });
+
+    const months = Object.keys(map).sort();
+    const actuals = months.map(m=>Math.round(map[m]));
+
+    // Simple linear forecast (avg of last 3)
+    const avg = actuals.slice(-3).reduce((a,b)=>a+b,0)/Math.max(1,actuals.slice(-3).length);
+    const forecast = actuals.map((v,i)=> i < actuals.length-1 ? null : Math.round(avg));
+
+    trendChart = new Chart(
+      document.getElementById("expenseTrend"),
+      {
+        type:"line",
+        data:{
+          labels: months,
+          datasets:[
+            {
+              label:"Actual",
+              data: actuals,
+              borderColor:"#4f6df5",
+              tension:0.35,
+              pointRadius:3
+            },
+            {
+              label:"Forecast",
+              data: forecast,
+              borderColor:"#9ca3af",
+              borderDash:[6,6],
+              tension:0.35,
+              pointRadius:3
+            }
+          ]
+        },
+        options:{
+          plugins:{legend:{display:false}},
+          scales:{
+            x:{grid:{display:false}, title:{display:true, text:"Months (YTD)"}},
+            y:{grid:{display:false}}
+          }
+        }
+      }
+    );
+  }
+}
+
+/* Hook into existing loaders */
+const prevLoadKPIs2 = loadKPIs;
+loadKPIs = async function(){
+  await prevLoadKPIs2();
+  loadTrend();
+};
+
+/* Initial */
+loadTrend();
+        </script>
+
+  <!-- ===== EXPENSE CATEGORY VISUAL ===== -->
+<section class="container" style="margin-top: 36px;">
+  <div class="card">
+    <h3 class="muted" style="margin-bottom: 10px;">
+      Expense Distribution by Category
+    </h3>
+
+    <div style="display:grid; grid-template-columns: 1fr 220px; gap:16px;">
+      <canvas id="categoryDonut" height="180"></canvas>
+
+      <!-- Top category insight -->
+      <div style="
+        background: var(--bg-soft);
+        border-radius: var(--radius-md);
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      ">
+        <div class="muted">Top Expense Category</div>
+        <div id="topCategory" style="
+          margin-top: 6px;
+          font-size: 16px;
+          font-weight: 600;
+        ">
+          —
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+let categoryChart;
+
+function destroyCategory(){
+  if(categoryChart){
+    categoryChart.destroy();
+    categoryChart = null;
+  }
+}
+
+async function loadCategoryChart(){
+  destroyCategory();
+
+  const rows = await fetchSheet("Budget_vs_Actual");
+  const now = new Date();
+  const currentYM = now.toISOString().slice(0,7);
+
+  const categoryMap = {};
+
+  rows.forEach(r=>{
+    const month = r.c[0]?.v;    // Month yyyy-mm
+    const category = r.c[1]?.v;
+    const actual = r.c[3]?.v || 0;
+
+    if(!category) return;
+
+    if(MODE === "MONTH"){
+      if(month === currentYM){
+        categoryMap[category] = (categoryMap[category] || 0) + actual;
+      }
+    } else {
+      // YTD: include months <= current month
+      if(month <= currentYM){
+        categoryMap[category] = (categoryMap[category] || 0) + actual;
+      }
+    }
+  });
+
+  const labels = Object.keys(categoryMap);
+  const values = labels.map(l=>Math.round(categoryMap[l]));
+
+  if(labels.length === 0){
+    document.getElementById("topCategory").innerText = "No data";
+    return;
+  }
+
+  // Find top category
+  let topCat = labels[0];
+  labels.forEach(l=>{
+    if(categoryMap[l] > categoryMap[topCat]) topCat = l;
+  });
+
+  document.getElementById("topCategory").innerText = topCat;
+
+  categoryChart = new Chart(
+    document.getElementById("categoryDonut"),
+    {
+      type:"doughnut",
+      data:{
+        labels: labels,
+        datasets:[{
+          data: values,
+          backgroundColor: [
+            "#4f6df5",
+            "#f59e0b",
+            "#1f9d55",
+            "#dc2626",
+            "#9333ea",
+            "#0ea5e9",
+            "#f97316"
+          ]
+        }]
+      },
+      options:{
+        cutout:"65%",
+        plugins:{
+          legend:{
+            position:"bottom",
+            labels:{
+              boxWidth:10,
+              font:{size:11}
+            }
+          }
+        }
+      }
+    }
+  );
+}
+
+/* Hook into KPI reload chain */
+const prevLoadKPIs3 = loadKPIs;
+loadKPIs = async function(){
+  await prevLoadKPIs3();
+  loadCategoryChart();
+};
+
+/* Initial */
+loadCategoryChart();
+</script>
+
+  <!-- ===== EMI OVERVIEW & STRESS ===== -->
+<section class="container" style="margin-top: 40px;">
+  <div class="card">
+
+    <h3 class="muted" style="margin-bottom: 14px;">
+      EMI Obligations & Stress
+    </h3>
+
+    <!-- EMI KPIs -->
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    ">
+
+      <div>
+        <div class="muted">EMI Paid</div>
+        <div id="emiPaid" style="font-size: 20px; font-weight: 700;">—</div>
+      </div>
+
+      <div>
+        <div class="muted">EMI Remaining</div>
+        <div id="emiRemaining" style="font-size: 20px; font-weight: 700;">—</div>
+      </div>
+
+      <div>
+        <div class="muted">EMI Stress</div>
+        <div id="emiStressPct" style="font-size: 20px; font-weight: 700;">—</div>
+      </div>
+
+    </div>
+
+    <!-- Stress Meter -->
+    <div style="
+      width: 100%;
+      height: 14px;
+      background: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    ">
+      <div
+        id="emiStressBar"
+        style="
+          height: 100%;
+          width: 0%;
+          transition: width 1.2s ease;
+        "
+      ></div>
+    </div>
+
+    <div
+      id="emiInsight"
+      style="
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--text-secondary);
+      "
+    >
+      —
+    </div>
+
+  </div>
+</section>
+
+<script>
+async function loadEMISection(){
+  const sheetName =
+    MODE === "MONTH" ? "Dashboard_KPIs_Month" : "Dashboard_KPIs_YTD";
+
+  const rows = await fetchSheet(sheetName);
+  const data = {};
+
+  rows.forEach(r=>{
+    if(r.c[0] && r.c[1]){
+      data[r.c[0].v] = r.c[1].v;
+    }
+  });
+
+  const emiPaid =
+    MODE === "MONTH"
+      ? data["EMI Paid (Current Month)"]
+      : data["EMI Paid (YTD)"];
+
+  const income =
+    MODE === "MONTH"
+      ? data["Current Month Income"]
+      : data["YTD Income"];
+
+  document.getElementById("emiPaid").innerText =
+    formatINR(emiPaid);
+
+  /* EMI Remaining (from EMI master summary sheet) */
+  const emiRows = await fetchSheet("EMI_Summary");
+  let remaining = 0;
+  emiRows.forEach(r=>{
+    remaining += r.c[5]?.v || 0; // Remaining_Liability
+  });
+
+  document.getElementById("emiRemaining").innerText =
+    formatINR(remaining);
+
+  /* Stress calculation */
+  const stressPct =
+    income > 0 ? (emiPaid / income) * 100 : 0;
+
+  document.getElementById("emiStressPct").innerText =
+    stressPct.toFixed(1) + "% of income";
+
+  const bar = document.getElementById("emiStressBar");
+  const insight = document.getElementById("emiInsight");
+
+  bar.style.width = Math.min(stressPct, 100) + "%";
+
+  if(stressPct <= 20){
+    bar.style.background = "var(--success)";
+    insight.innerText = "EMI load is healthy. Well within safe limits.";
+  } else if(stressPct <= 35){
+    bar.style.background = "var(--warning)";
+    insight.innerText = "EMI load is moderate. Avoid adding new debt.";
+  } else {
+    bar.style.background = "var(--danger)";
+    insight.innerText = "High EMI stress. Focus on repayment & cost control.";
+  }
+}
+
+/* Hook into reload chain */
+const prevLoadKPIs4 = loadKPIs;
+loadKPIs = async function(){
+  await prevLoadKPIs4();
+  loadEMISection();
+};
+
+/* Initial */
+loadEMISection();
+</script>
+
+  <!-- ===== CASH RUNWAY & ALERTS ===== -->
+<section class="container" style="margin-top: 42px;">
+  <div class="card">
+
+    <h3 class="muted" style="margin-bottom: 14px;">
+      Cash Runway & Smart Alerts
+    </h3>
+
+    <!-- Runway KPI -->
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    ">
+
+      <div>
+        <div class="muted">Cash in Hand</div>
+        <div id="cashBalance" style="font-size: 20px; font-weight: 700;">—</div>
+      </div>
+
+      <div>
+        <div class="muted">Avg Daily Expense (15 days)</div>
+        <div id="dailyExpense" style="font-size: 20px; font-weight: 700;">—</div>
+      </div>
+
+      <div>
+        <div class="muted">Cash Runway</div>
+        <div id="cashRunway" style="font-size: 20px; font-weight: 700;">—</div>
+      </div>
+
+    </div>
+
+    <!-- Runway Gauge -->
+    <div style="
+      width: 100%;
+      height: 14px;
+      background: var(--bg-soft);
+      border-radius: 999px;
+      overflow: hidden;
+    ">
+      <div
+        id="runwayBar"
+        style="
+          height: 100%;
+          width: 0%;
+          transition: width 1.2s ease;
+        "
+      ></div>
+    </div>
+
+    <!-- Alerts -->
+    <div
+      id="cashAlerts"
+      style="
+        margin-top: 12px;
+        font-size: 13px;
+        color: var(--text-secondary);
+      "
+    >
+      —
+    </div>
+
+  </div>
+</section>
+
+<script>
+async function loadCashRunway(){
+  /* ---- Get cash balance ---- */
+  const accRows = await fetchSheet("Account_Balances_Live");
+  let cash = 0;
+  let backupAccount = null;
+
+  accRows.forEach(r=>{
+    const acc = r.c[0]?.v;
+    const bal = r.c[4]?.v || 0;
+
+    if(acc === "Cash") cash = bal;
+    if(acc !== "Cash" && bal > 5000 && !backupAccount){
+      backupAccount = { name: acc, balance: bal };
+    }
+  });
+
+  document.getElementById("cashBalance").innerText = formatINR(cash);
+
+  /* ---- Last 15 days expenses ---- */
+  const txnRows = await fetchSheet("Txn_Clean");
+  const today = new Date();
+  const cutoff = new Date();
+  cutoff.setDate(today.getDate() - 15);
+
+  let totalExpense = 0;
+  txnRows.forEach(r=>{
+    const amt = r.c[9]?.v || 0;     // Signed_Amount
+    const date = new Date(r.c[1]?.v);
+
+    if(amt < 0 && date >= cutoff){
+      totalExpense += Math.abs(amt);
+    }
+  });
+
+  const avgDaily = totalExpense / 15;
+
+  document.getElementById("dailyExpense").innerText =
+    formatINR(Math.round(avgDaily));
+
+  /* ---- Runway ---- */
+  const runwayDays = avgDaily > 0 ? Math.floor(cash / avgDaily) : 0;
+  document.getElementById("cashRunway").innerText =
+    runwayDays + " days";
+
+  /* ---- Gauge ---- */
+  const bar = document.getElementById("runwayBar");
+  const pct = Math.min((runwayDays / 30) * 100, 100);
+  bar.style.width = pct + "%";
+
+  if(runwayDays <= 7){
+    bar.style.background = "var(--danger)";
+  } else if(runwayDays <= 14){
+    bar.style.background = "var(--warning)";
+  } else {
+    bar.style.background = "var(--success)";
+  }
+
+  /* ---- Alerts ---- */
+  const alertBox = document.getElementById("cashAlerts");
+  let msg = "";
+
+  if(runwayDays <= 7){
+    msg += `🔴 Cash will last only ${runwayDays} days. `;
+    if(backupAccount){
+      const needed = Math.round(avgDaily * 15 - cash);
+      msg += `Consider transferring ${formatINR(needed)} from ${backupAccount.name}.`;
+    }
+  } else if(runwayDays <= 14){
+    msg += `⚠️ Cash runway is tight (${runwayDays} days). Monitor spending closely.`;
+  } else {
+    msg += `✅ Cash runway is comfortable (${runwayDays} days).`;
+  }
+
+  alertBox.innerText = msg;
+}
+
+/* Hook into reload chain */
+const prevLoadKPIs5 = loadKPIs;
+loadKPIs = async function(){
+  await prevLoadKPIs5();
+  loadCashRunway();
+};
+
+/* Initial */
+loadCashRunway();
+</script>
+
+  <!-- ===== AI INSIGHTS PANEL ===== -->
+<section class="container" style="margin-top: 44px;">
+  <div class="card">
+
+    <h3 class="muted" style="margin-bottom: 12px;">
+      Smart Insights
+    </h3>
+
+    <div id="aiInsights" style="
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    ">
+      Loading insights…
+    </div>
+
+  </div>
+</section>
+
+<script>
+function addInsight(text){
+  const box = document.getElementById("aiInsights");
+  const div = document.createElement("div");
+  div.style.background = "var(--bg-soft)";
+  div.style.borderRadius = "10px";
+  div.style.padding = "10px 12px";
+  div.innerText = text;
+  box.appendChild(div);
+}
+
+async function loadAIInsights(){
+  const box = document.getElementById("aiInsights");
+  box.innerHTML = "";
+
+  /* ---- Pull KPI data ---- */
+  const sheetName =
+    MODE === "MONTH" ? "Dashboard_KPIs_Month" : "Dashboard_KPIs_YTD";
+
+  const rows = await fetchSheet(sheetName);
+  const data = {};
+  rows.forEach(r=>{
+    if(r.c[0] && r.c[1]) data[r.c[0].v] = r.c[1].v;
+  });
+
+  const expenses =
+    MODE === "MONTH"
+      ? data["Current Month Expenses"]
+      : data["YTD Expenses"];
+
+  const income =
+    MODE === "MONTH"
+      ? data["Current Month Income"]
+      : data["YTD Income"];
+
+  const netSavings =
+    MODE === "MONTH"
+      ? data["Current Month Net Savings"]
+      : data["YTD Net Savings"];
+
+  const burnPct =
+    MODE === "MONTH"
+      ? data["Budget Used %"]
+      : data["YTD Budget Used %"];
+
+  /* ---- Insights logic ---- */
+
+  // Budget pacing
+  if(burnPct > 0.9){
+    addInsight("🚨 You have used more than 90% of your budget. Strongly limit discretionary spending.");
+  } else if(burnPct > 0.6){
+    addInsight("⚠️ Budget burn is high. You may need to slow down expenses to stay on track.");
+  } else {
+    addInsight("✅ Budget usage is under control. Good financial discipline.");
+  }
+
+  // Savings health
+  if(netSavings < 0){
+    addInsight("🔴 Net savings are negative. Immediate review of expenses and obligations is recommended.");
+  } else {
+    addInsight("💰 You are saving money after expenses and investments. Keep it up.");
+  }
+
+  // Income dependency
+  if(expenses > income * 0.8){
+    addInsight("📉 Expenses are consuming a large portion of income. Try reducing variable costs.");
+  }
+
+  // Mode hint
+  addInsight(
+    MODE === "MONTH"
+      ? "📅 You are viewing current month performance."
+      : "📈 You are viewing year-to-date financial performance."
+  );
+}
+
+/* Hook into final reload chain */
+const prevLoadKPIsFinal = loadKPIs;
+loadKPIs = async function(){
+  await prevLoadKPIsFinal();
+  loadAIInsights();
+};
+
+/* Initial */
+loadAIInsights();
+</script>
+
+<!-- ===== PWA SUPPORT (OPTIONAL, SAFE) ===== -->
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+</script>
+
+  
 </body>
 </html>
