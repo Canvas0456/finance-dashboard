@@ -1,410 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
 <title>Kaiwalya’s Finance Dashboard</title>
 
-<!-- Google Font -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d12">
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
 
 <style>
+/* =========================
+   APPLE iOS-26 FINANCE THEME
+   ========================= */
+
 :root {
-  --bg-main: #0f1115;
-  --bg-card: rgba(255,255,255,0.06);
+  --bg-main: #0b0d12;
   --bg-glass: rgba(255,255,255,0.08);
-  --border-soft: rgba(255,255,255,0.12);
-  --text-main: #f5f6f7;
-  --text-muted: #9aa0a6;
-  --accent-blue: #5b8cff;
-  --accent-green: #4cd964;
-  --accent-orange: #ff9f0a;
+  --bg-card: rgba(255,255,255,0.06);
+
+  --text-main: #f5f5f7;
+  --text-muted: #9da0a6;
+
+  --accent-blue: #0a84ff;
+  --accent-green: #30d158;
   --accent-red: #ff453a;
-  --radius-lg: 18px;
-  --radius-md: 14px;
+  --accent-orange: #ff9f0a;
+
+  --radius-xl: 26px;
+  --radius-lg: 20px;
+  --blur: blur(22px);
+
+  --shadow-soft:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 20px 40px rgba(0,0,0,0.45);
 }
 
 * {
   box-sizing: border-box;
-  font-family: 'Inter', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, sans-serif;
 }
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #1a1f2b, #0f1115 60%);
+  background: radial-gradient(circle at top, #121520, #06070b);
   color: var(--text-main);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
-/* ===== Fixed Header ===== */
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  backdrop-filter: blur(14px);
-  background: linear-gradient(
-    to bottom,
-    rgba(15,17,21,0.85),
-    rgba(15,17,21,0.65)
-  );
-  border-bottom: 1px solid var(--border-soft);
+/* GLASS CARD */
+.card {
+  background: var(--bg-glass);
+  backdrop-filter: var(--blur);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+  padding: 20px;
 }
 
-.header-inner {
-  max-width: 1200px;
-  margin: auto;
-  padding: 18px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-left h1 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.header-left p {
-  margin: 4px 0 0;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.header-right {
-  text-align: right;
-  font-size: 13px;
-}
-
-.header-date {
-  font-weight: 500;
-}
-
-.header-period {
-  margin-top: 4px;
-  color: var(--accent-blue);
-  font-weight: 500;
-}
-
-/* ===== Page Wrapper ===== */
-.app-container {
-  max-width: 1200px;
-  margin: auto;
-  padding: 24px 20px 120px;
-}
-
-/* ===== Utility ===== */
-.glass {
-  background: var(--bg-card);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(14px);
-}
-
-.section {
-  margin-top: 26px;
-}
-
+/* SECTION TITLES */
 .section-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 14px;
+  color: var(--text-main);
+  margin: 24px 0 12px;
 }
 
-.fade-in {
-  animation: fadeIn 0.6s ease forwards;
+/* BUTTONS */
+button {
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: inherit;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
+/* HIDDEN */
+.hidden {
+  display: none !important;
 }
 </style>
 </head>
 
 <body>
+<!-- =========================
+     LOGIN / FACE ID SCREEN
+     ========================= -->
 
-<!-- ================= HEADER ================= -->
-<header class="app-header">
-  <div class="header-inner">
-    <div class="header-left">
-      <h1>Kaiwalya’s Finance Dashboard</h1>
-      <p>Clarity over cash. Control over chaos.</p>
+<div id="lockScreen" class="card" style="
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+">
+
+  <div style="
+    width: 340px;
+    text-align: center;
+  ">
+
+    <!-- FACE ID ICON -->
+    <div id="faceIcon" style="
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 20px;
+      border-radius: 24px;
+      background: linear-gradient(145deg,#1c1f2b,#0c0e14);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      box-shadow: var(--shadow-soft);
+      transition: transform .6s ease, background .6s ease;
+    ">
+      😊
     </div>
 
-    <div class="header-right">
-      <div class="header-date" id="todayDate">—</div>
-      <div class="header-period" id="selectedPeriod">MONTH · —</div>
+    <!-- TITLE -->
+    <h2 style="margin: 0 0 6px;">Kaiwalya</h2>
+    <p style="margin: 0 0 22px; color: var(--text-muted); font-size: 14px;">
+      Face ID or Password
+    </p>
+
+    <!-- USER ID -->
+    <input id="userIdInput" placeholder="User ID"
+      style="
+        width: 100%;
+        padding: 14px;
+        border-radius: 14px;
+        border: none;
+        margin-bottom: 12px;
+        background: rgba(255,255,255,0.08);
+        color: white;
+        outline: none;
+      ">
+
+    <!-- PASSWORD -->
+    <input id="passwordInput" type="password" placeholder="Password"
+      style="
+        width: 100%;
+        padding: 14px;
+        border-radius: 14px;
+        border: none;
+        margin-bottom: 18px;
+        background: rgba(255,255,255,0.08);
+        color: white;
+        outline: none;
+      ">
+
+    <!-- LOGIN BUTTON -->
+    <button onclick="attemptLogin()" style="
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--accent-blue);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(10,132,255,.4);
+    ">
+      Unlock
+    </button>
+
+    <!-- ERROR -->
+    <div id="loginError" style="
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--accent-red);
+      display: none;
+    ">
+      Invalid credentials
     </div>
+
   </div>
-</header>
+</div>
 
-<!-- ================= APP CONTENT START ================= -->
-<div class="app-container">
-  
 <script>
-/* ===============================
+/* =========================
+   LOGIN + FACE ID LOGIC
+   ========================= */
+
+const VALID_USER = "Kaiwalya";
+const VALID_PASS = "1234555";
+
+function attemptLogin() {
+  const user = document.getElementById("userIdInput").value.trim();
+  const pass = document.getElementById("passwordInput").value.trim();
+  const face = document.getElementById("faceIcon");
+  const error = document.getElementById("loginError");
+
+  error.style.display = "none";
+
+  if (user === VALID_USER && pass === VALID_PASS) {
+    // Face ID success animation
+    face.style.transform = "scale(1.2)";
+    face.style.background = "linear-gradient(145deg,#30d158,#0f5)";
+    face.innerText = "🔓";
+
+    setTimeout(() => {
+      document.getElementById("lockScreen").style.opacity = "0";
+      document.getElementById("lockScreen").style.pointerEvents = "none";
+      setTimeout(() => {
+        document.getElementById("lockScreen").remove();
+      }, 600);
+    }, 600);
+
+  } else {
+    error.style.display = "block";
+    face.style.transform = "scale(.9)";
+    face.innerText = "😐";
+    setTimeout(() => {
+      face.style.transform = "scale(1)";
+    }, 300);
+  }
+}
+</script>
+<!-- =========================
+     APP SHELL
+     ========================= -->
+
+<div id="appShell" style="
+  opacity: 1;
+  transition: opacity .6s ease;
+">
+
+  <!-- FIXED HEADER -->
+  <header style="
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(18px);
+    background: linear-gradient(
+      to bottom,
+      rgba(15,17,26,.92),
+      rgba(15,17,26,.75)
+    );
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  ">
+    <div class="container" style="
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+    ">
+
+      <!-- TITLE -->
+      <div>
+        <h1 style="margin:0;">Kaiwalya’s Finance Dashboard</h1>
+        <div style="
+          font-size: 13px;
+          color: var(--text-muted);
+          margin-top: 4px;
+        ">
+          Clarity over cash. Control over chaos.
+        </div>
+      </div>
+
+      <!-- DATE + PERIOD -->
+      <div style="text-align:right;">
+        <div id="todayDate" style="
+          font-size: 13px;
+          color: var(--text-muted);
+        ">
+          <!-- JS inject -->
+        </div>
+        <div id="selectedPeriod" style="
+          font-size: 14px;
+          font-weight: 600;
+          margin-top: 4px;
+        ">
+          <!-- JS inject -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TOGGLES -->
+    <div class="container" style="
+      display: flex;
+      gap: 10px;
+      padding-bottom: 14px;
+    ">
+      <button id="toggleMonth"
+        onclick="setView('MONTH')"
+        style="
+          padding: 8px 16px;
+          border-radius: 999px;
+          background: var(--accent-blue);
+          color: white;
+          font-weight: 600;
+        ">
+        Month
+      </button>
+
+      <button id="toggleYTD"
+        onclick="setView('YTD')"
+        style="
+          padding: 8px 16px;
+          border-radius: 999px;
+          background: rgba(255,255,255,.08);
+          color: var(--text-muted);
+          font-weight: 600;
+        ">
+        YTD
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT WRAPPER -->
+  <main class="container" id="mainContent" style="
+    padding-top: 26px;
+    padding-bottom: 120px;
+  ">
+    <!-- NEXT PARTS WILL RENDER HERE -->
+  </main>
+
+</div>
+
+<script>
+/* =========================
+   HEADER + TOGGLE LOGIC
+   ========================= */
+
+let CURRENT_VIEW = "MONTH";
+
+function setView(view) {
+  CURRENT_VIEW = view;
+
+  const mBtn = document.getElementById("toggleMonth");
+  const yBtn = document.getElementById("toggleYTD");
+
+  if (view === "MONTH") {
+    mBtn.style.background = "var(--accent-blue)";
+    mBtn.style.color = "#fff";
+    yBtn.style.background = "rgba(255,255,255,.08)";
+    yBtn.style.color = "var(--text-muted)";
+  } else {
+    yBtn.style.background = "var(--accent-blue)";
+    yBtn.style.color = "#fff";
+    mBtn.style.background = "rgba(255,255,255,.08)";
+    mBtn.style.color = "var(--text-muted)";
+  }
+
+  updatePeriodLabel();
+  // Future: refresh charts & KPIs here
+}
+
+/* DATE + PERIOD */
+function updatePeriodLabel() {
+  const now = new Date();
+
+  const options = { month: 'long', year: 'numeric' };
+  const monthLabel = now.toLocaleDateString(undefined, options);
+
+  document.getElementById("todayDate").innerText =
+    now.toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+
+  document.getElementById("selectedPeriod").innerText =
+    CURRENT_VIEW === "MONTH"
+      ? `MONTH · ${monthLabel}`
+      : `YTD · ${now.getFullYear()}`;
+}
+
+updatePeriodLabel();
+</script>
+<!-- =========================
+     KPI SECTION
+     ========================= -->
+
+<section id="kpiSection" style="margin-top: 22px;">
+  <div class="grid grid-4">
+
+    <div class="card kpi">
+      <div class="kpi-label">Total Balance</div>
+      <div class="kpi-value" id="kpiBalance">—</div>
+    </div>
+
+    <div class="card kpi">
+      <div class="kpi-label">Total Expenses</div>
+      <div class="kpi-value" id="kpiExpenses">—</div>
+    </div>
+
+    <div class="card kpi">
+      <div class="kpi-label">Budget Burn %</div>
+      <div class="kpi-value" id="kpiBurn">—</div>
+    </div>
+
+    <div class="card kpi">
+      <div class="kpi-label">Budget Remaining</div>
+      <div class="kpi-value" id="kpiRemaining">—</div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+/* KPI styling */
+.kpi {
+  padding: 22px;
+  min-height: 110px;
+}
+
+.kpi-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+</style>
+
+<script>
+/* =========================
    GOOGLE SHEETS CONFIG
-================================ */
+   ========================= */
+
 const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
-const SHEET_BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?`;
 
-/* ===============================
-   GLOBAL STATE
-================================ */
-let VIEW_MODE = "MONTH"; // MONTH | YTD
-let CURRENT_MONTH = new Date();
+/*
+Dashboard_KPIs sheet structure:
+Column A: KPI
+Column B: Value
+*/
 
-/* ===============================
-   DATE HELPERS
-================================ */
-function formatDateHuman(date) {
-  return date.toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  });
-}
+const KPI_SHEET_NAME = "Dashboard_KPIs";
 
-function formatMonthYYYYMM(date) {
-  return date.toISOString().slice(0,7);
-}
+/* =========================
+   FETCH KPI DATA
+   ========================= */
 
-function formatMonthMMMMYYYY(date) {
-  return date.toLocaleDateString("en-IN", {
-    month: "long",
-    year: "numeric"
-  });
-}
-
-/* ===============================
-   HEADER INIT
-================================ */
-document.getElementById("todayDate").innerText =
-  formatDateHuman(new Date());
-
-document.getElementById("selectedPeriod").innerText =
-  `MONTH · ${formatMonthMMMMYYYY(CURRENT_MONTH)}`;
-
-/* ===============================
-   CORE FETCH ENGINE
-================================ */
-async function fetchSheet(sheetName, query = "SELECT *") {
-  const url =
-    SHEET_BASE +
-    `sheet=${encodeURIComponent(sheetName)}` +
-    `&tq=${encodeURIComponent(query)}`;
+async function fetchKPIs() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${KPI_SHEET_NAME}&tqx=out:json`;
 
   const res = await fetch(url);
   const text = await res.text();
+  const json = JSON.parse(text.substr(47).slice(0, -2));
 
-  const json = JSON.parse(
-    text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1)
-  );
-
-  const cols = json.table.cols.map(c => c.label);
-  const rows = json.table.rows.map(r =>
-    r.c.map(c => (c ? c.v : null))
-  );
-
-  return rows.map(row =>
-    Object.fromEntries(row.map((val, i) => [cols[i], val]))
-  );
-}
-
-/* ===============================
-   SAFE NUMBER FORMAT
-================================ */
-function money(val) {
-  if (val === null || isNaN(val)) return "₹0";
-  return "₹" + Math.round(val).toLocaleString("en-IN");
-}
-
-/* ===============================
-   MONTH / YTD TOGGLE HANDLER
-================================ */
-function setViewMode(mode) {
-  VIEW_MODE = mode;
-
-  document.getElementById("selectedPeriod").innerText =
-    mode === "MONTH"
-      ? `MONTH · ${formatMonthMMMMYYYY(CURRENT_MONTH)}`
-      : `YTD · ${CURRENT_MONTH.getFullYear()}`;
-
-  refreshDashboard();
-}
-
-/* ===============================
-   DASHBOARD REFRESH (MASTER)
-================================ */
-async function refreshDashboard() {
-  console.log("Refreshing dashboard:", VIEW_MODE);
-
-  await loadKPIs();
-  await loadBudgetBar();
-  await loadExpenseTrend();
-  await loadEMIs();
-}
-
-/* ===============================
-   INITIAL LOAD
-================================ */
-refreshDashboard();
-</script>
-
-  <script>
-/* ===============================
-   KPI LOADERS
-================================ */
-
-async function loadKPIs() {
-  const kpis = await fetchSheet("Dashboard_KPIs");
+  const rows = json.table.rows;
 
   const map = {};
-  kpis.forEach(k => map[k.KPI] = k.Value);
-
-  /* TOTAL BALANCE */
-  document.getElementById("kpi-balance").innerText =
-    money(map["Total Balance (All Accounts)"]);
-
-  /* TOTAL EXPENSES */
-  document.getElementById("kpi-expense").innerText =
-    money(map["Current Month Expenses"]);
-
-  /* BUDGET BURN % */
-  const burn = Number(map["Budget Used %"]) || 0;
-  const burnPct = (burn * 100).toFixed(1);
-
-  document.getElementById("kpi-burn").innerText =
-    burnPct + "%";
-
-  /* BUDGET REMAINING */
-  document.getElementById("kpi-remaining").innerText =
-    money(map["Budget Remaining"]);
-}
-
-/* ===============================
-   BUDGET UTILISATION BAR
-================================ */
-async function loadBudgetBar() {
-  const rows = await fetchSheet("Budget_vs_Actual");
-
-  const currentMonth = formatMonthYYYYMM(CURRENT_MONTH);
-
-  let budget = 0;
-  let actual = 0;
-
   rows.forEach(r => {
-    if (
-      VIEW_MODE === "MONTH" &&
-      r.Month === currentMonth
-    ) {
-      budget += Number(r.Budget_Amount || 0);
-      actual += Number(r.Actual_Amount || 0);
-    }
-
-    if (
-      VIEW_MODE === "YTD" &&
-      r.Month.startsWith(CURRENT_MONTH.getFullYear())
-    ) {
-      budget += Number(r.Budget_Amount || 0);
-      actual += Number(r.Actual_Amount || 0);
-    }
+    if (!r.c[0] || !r.c[1]) return;
+    map[r.c[0].v] = r.c[1].v;
   });
 
-  const usedPct = budget === 0 ? 0 : (actual / budget) * 100;
-  const remaining = Math.max(budget - actual, 0);
-
-  document.getElementById("budgetUsedText").innerText =
-    `Used ${usedPct.toFixed(1)}%`;
-
-  document.getElementById("budgetRemainText").innerText =
-    `Remaining ${money(remaining)}`;
-
-  document.getElementById("budgetBarFill").style.width =
-    Math.min(usedPct, 100) + "%";
+  renderKPIs(map);
 }
-  </script>
-<!-- ===============================
-     EXPENSE TREND SECTION
-================================ -->
-<section class="card">
-  <h3 class="section-title">Expense Trend</h3>
-  <canvas id="expenseTrend" height="140"></canvas>
+
+/* =========================
+   RENDER KPI VALUES
+   ========================= */
+
+function renderKPIs(data) {
+  document.getElementById("kpiBalance").innerText =
+    "₹" + Number(data["Total Balance (All Accounts)"] || 0).toLocaleString();
+
+  document.getElementById("kpiExpenses").innerText =
+    "₹" + Number(data["Current Month Expenses"] || 0).toLocaleString();
+
+  document.getElementById("kpiBurn").innerText =
+    ((Number(data["Budget Used %"] || 0) * 100).toFixed(2)) + "%";
+
+  document.getElementById("kpiRemaining").innerText =
+    "₹" + Number(data["Budget Remaining"] || 0).toLocaleString();
+}
+
+/* =========================
+   INIT
+   ========================= */
+
+fetchKPIs();
+</script>
+<!-- =========================
+     BUDGET UTILISATION
+     ========================= -->
+
+<section style="margin-top: 26px;">
+  <div class="card">
+
+    <!-- BAR -->
+    <div style="
+      width: 100%;
+      height: 16px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.12);
+      overflow: hidden;
+    ">
+      <div id="budgetBarFill" style="
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          #0a84ff,
+          #30d158
+        );
+        border-radius: 999px;
+        transition: width 1.2s ease;
+      "></div>
+    </div>
+
+    <!-- LABELS -->
+    <div style="
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    ">
+      <span id="budgetUsedLabel">Used —</span>
+      <span id="budgetRemainLabel">Remaining —</span>
+    </div>
+
+  </div>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-let expenseChart;
+/* =========================
+   BUDGET BAR LOGIC
+   ========================= */
 
-/* ===============================
-   LOAD EXPENSE TREND
-================================ */
-async function loadExpenseTrend() {
-  const txns = await fetchSheet("Txn_Clean");
+/*
+Budget_vs_Actual sheet:
+A: Month (yyyy-mm)
+B: Category
+C: Budget_Amount
+D: Actual_Amount
+*/
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
+async function loadBudgetBar() {
+  const sheet = "Budget_vs_Actual";
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}&tqx=out:json`;
 
-  let labels = [];
-  let actuals = [];
-  let forecast = [];
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.substr(47).slice(0, -2));
 
-  if (VIEW_MODE === "MONTH") {
-    /* -------- WEEKLY (CURRENT MONTH) -------- */
-    const weekly = {};
+  const rows = json.table.rows;
+  const now = new Date();
 
-    txns.forEach(t => {
-      if (!t.Txn_Date) return;
+  let totalBudget = 0;
+  let totalActual = 0;
 
-      const d = new Date(t.Txn_Date);
-      if (d.getFullYear() !== year || d.getMonth() !== month) return;
-      if (Number(t.Signed_Amount) >= 0) return;
+  rows.forEach(r => {
+    if (!r.c[0] || !r.c[2] || !r.c[3]) return;
 
-      const week = getWeekOfMonth(d);
-      weekly[week] = (weekly[week] || 0) + Math.abs(Number(t.Signed_Amount));
-    });
+    const rowMonth = r.c[0].v; // yyyy-mm
+    const budget = Number(r.c[2].v || 0);
+    const actual = Number(r.c[3].v || 0);
 
-    labels = Object.keys(weekly).map(w => "W" + w);
-    actuals = Object.values(weekly);
-  }
+    if (CURRENT_VIEW === "MONTH") {
+      const currentMonth =
+        now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+      if (rowMonth !== currentMonth) return;
+    }
 
-  if (VIEW_MODE === "YTD") {
-    /* -------- MONTHLY YTD -------- */
-    const monthly = {};
+    if (CURRENT_VIEW === "YTD") {
+      if (!rowMonth.startsWith(String(now.getFullYear()))) return;
+    }
 
-    txns.forEach(t => {
-      if (!t.Txn_Date) return;
+    totalBudget += budget;
+    totalActual += actual;
+  });
 
-      const d = new Date(t.Txn_Date);
-      if (d > today) return;
-      if (Number(t.Signed_Amount) >= 0) return;
+  const usedPct =
+    totalBudget === 0 ? 0 : Math.min((totalActual / totalBudget) * 100, 100);
 
-      const key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
-      monthly[key] = (monthly[key] || 0) + Math.abs(Number(t.Signed_Amount));
-    });
+  document.getElementById("budgetBarFill").style.width =
+    usedPct.toFixed(2) + "%";
 
-    labels = Object.keys(monthly);
-    actuals = Object.values(monthly);
+  document.getElementById("budgetUsedLabel").innerText =
+    `Used ₹${totalActual.toLocaleString()}`;
 
-    /* -------- SIMPLE FORECAST -------- */
-    const avg =
-      actuals.reduce((a, b) => a + b, 0) / actuals.length || 0;
-
-    forecast = actuals.map(() => avg);
-  }
-
-  renderExpenseChart(labels, actuals, forecast);
+  document.getElementById("budgetRemainLabel").innerText =
+    `Remaining ₹${Math.max(totalBudget - totalActual, 0).toLocaleString()}`;
 }
 
-/* ===============================
-   RENDER CHART
-================================ */
-function renderExpenseChart(labels, actuals, forecast) {
-  const ctx = document.getElementById("expenseTrend").getContext("2d");
+/* =========================
+   AUTO REFRESH ON TOGGLE
+   ========================= */
 
+const originalSetView = setView;
+setView = function(view) {
+  originalSetView(view);
+  loadBudgetBar();
+};
+
+loadBudgetBar();
+        </script>
+
+  <!-- =========================
+     EXPENSE TREND
+     ========================= -->
+
+<section style="margin-top:28px;">
+  <div class="card">
+    <div class="section-title">Expense Trend</div>
+    <canvas id="expenseTrendChart" height="220"></canvas>
+  </div>
+</section>
+
+<script>
+/* =========================
+   EXPENSE TREND ENGINE
+   ========================= */
+
+let expenseChart;
+
+/* ---- Helpers ---- */
+function yyyyMM(d){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+function startOfYear(d){ return new Date(d.getFullYear(), 0, 1); }
+function weekOfMonth(d){
+  const first = new Date(d.getFullYear(), d.getMonth(), 1);
+  return Math.ceil((d.getDate() + first.getDay()) / 7);
+}
+
+/* ---- Load & Build ---- */
+async function loadExpenseTrend(){
+  const sheet = "Txn_Clean";
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${sheet}&tqx=out:json`;
+  const res = await fetch(url);
+  const txt = await res.text();
+  const json = JSON.parse(txt.substr(47).slice(0,-2));
+  const rows = json.table.rows || [];
+
+  const now = new Date();
+  let labels = [];
+  let actual = [];
+  let forecast = [];
+
+  if (CURRENT_VIEW === "MONTH"){
+    // Weekly aggregation (current month)
+    const map = {};
+    rows.forEach(r=>{
+      if (!r.c || !r.c[1] || !r.c[9]) return; // Txn_Date, Signed_Amount
+      const d = new Date(r.c[1].v);
+      if (d.getFullYear()!==now.getFullYear() || d.getMonth()!==now.getMonth()) return;
+      const amt = Number(r.c[9].v || 0);
+      if (amt >= 0) return; // expenses only
+      const w = "W" + weekOfMonth(d);
+      map[w] = (map[w] || 0) + Math.abs(amt);
+    });
+    labels = Object.keys(map);
+    actual = labels.map(l=>map[l]);
+    forecast = []; // no forecast in Month view
+  } else {
+    // YTD monthly aggregation + simple forecast
+    const map = {};
+    rows.forEach(r=>{
+      if (!r.c || !r.c[1] || !r.c[9]) return;
+      const d = new Date(r.c[1].v);
+      if (d < startOfYear(now) || d > now) return;
+      const amt = Number(r.c[9].v || 0);
+      if (amt >= 0) return;
+      const m = yyyyMM(d);
+      map[m] = (map[m] || 0) + Math.abs(amt);
+    });
+
+    labels = Object.keys(map).sort();
+    actual = labels.map(l=>map[l]);
+
+    // Forecast next 1 month using simple average
+    if (actual.length >= 2){
+      const avg = actual.reduce((a,b)=>a+b,0)/actual.length;
+      labels = [...labels, "Forecast"];
+      forecast = [...actual.map(()=>null), avg];
+      actual.push(null);
+    }
+  }
+
+  renderExpenseChart(labels, actual, forecast);
+}
+
+/* ---- Render Chart ---- */
+function renderExpenseChart(labels, actual, forecast){
+  const ctx = document.getElementById("expenseTrendChart").getContext("2d");
   if (expenseChart) expenseChart.destroy();
 
   expenseChart = new Chart(ctx, {
@@ -413,163 +699,169 @@ function renderExpenseChart(labels, actuals, forecast) {
       labels,
       datasets: [
         {
-          label: "Actual Spend",
-          data: actuals,
-          borderColor: "#5B6EFF",
-          backgroundColor: "rgba(91,110,255,0.15)",
-          tension: 0.45,
+          label: "Actual",
+          data: actual,
+          borderColor: "#0a84ff",
+          backgroundColor: "rgba(10,132,255,.25)",
+          tension: .35,
           fill: true,
-          pointRadius: 4
+          pointRadius: 3
         },
-        forecast.length
-          ? {
-              label: "Forecast",
-              data: forecast,
-              borderColor: "#999",
-              borderDash: [6, 6],
-              tension: 0.45,
-              pointRadius: 0
-            }
-          : null
-      ].filter(Boolean)
+        {
+          label: "Forecast",
+          data: forecast,
+          borderColor: "#9da0a6",
+          borderDash: [6,6],
+          tension: .35,
+          fill: false,
+          pointRadius: 0
+        }
+      ]
     },
     options: {
       responsive: true,
       plugins: {
-        legend: { display: false }
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => "₹" + Number(c.raw || 0).toLocaleString("en-IN")
+          }
+        }
       },
       scales: {
         x: {
-          grid: { display: false }
+          grid: { display: false },
+          ticks: { color: "#9da0a6" }
         },
         y: {
-          grid: { display: false },
+          grid: { color: "rgba(255,255,255,.06)" },
           ticks: {
-            callback: v => "₹" + v.toLocaleString()
+            color: "#9da0a6",
+            callback: v => "₹" + v/1000 + "k"
           }
         }
       }
     }
   });
 }
-</script>
 
-  <!-- ===============================
-     EXPENSE CATEGORIES
-================================ -->
-<section class="card">
-  <h3 class="section-title">Expense Categories</h3>
+/* ---- Refresh on toggle ---- */
+const _setView6 = setView;
+setView = function(v){
+  _setView6(v);
+  loadExpenseTrend();
+};
 
-  <div class="category-layout">
-    <canvas id="categoryDonut"></canvas>
+loadExpenseTrend();
+        </script>
 
-    <div id="categoryList" class="category-list"></div>
+  <!-- =========================
+     CATEGORY EXPENSES
+     ========================= -->
+
+<section style="margin-top:28px;">
+  <div class="card">
+
+    <div class="section-title">Expense Categories</div>
+
+    <div style="
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 22px;
+      align-items: center;
+    ">
+
+      <!-- DONUT -->
+      <canvas id="categoryDonut" width="220" height="220"></canvas>
+
+      <!-- LIST -->
+      <div id="categoryList"></div>
+
+    </div>
+
   </div>
 </section>
 
 <style>
-.category-layout {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  gap: 20px;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  .category-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.category-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
 .category-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.04);
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
   font-size: 14px;
 }
 
-.category-row.over {
-  border-left: 4px solid var(--accent-red);
-}
-
-.category-row.ok {
-  border-left: 4px solid var(--accent-green);
-}
-
 .category-name {
-  font-weight: 500;
+  color: var(--text-main);
 }
 
 .category-amt {
   font-weight: 600;
 }
+
+.category-over {
+  color: var(--accent-red);
+}
+
+.category-ok {
+  color: var(--accent-green);
+}
 </style>
 
 <script>
+/* =========================
+   CATEGORY ENGINE
+   ========================= */
+
 let categoryChart;
 
-/* ===============================
-   LOAD CATEGORY INSIGHTS
-================================ */
 async function loadCategories() {
-  const rows = await fetchSheet("Budget_vs_Actual");
+  const now = new Date();
+  const currentMonth =
+    now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
 
-  const currentMonth = formatMonthYYYYMM(CURRENT_MONTH);
+  /* -------- FETCH ACTUALS -------- */
+  const actualUrl =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Category_Monthly_Actuals&tqx=out:json`;
+  const actualRes = await fetch(actualUrl);
+  const actualTxt = await actualRes.text();
+  const actualJson = JSON.parse(actualTxt.substr(47).slice(0, -2));
+  const actualRows = actualJson.table.rows;
 
-  const map = {};
+  /* -------- FETCH BUDGETS -------- */
+  const budgetUrl =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Budgets_Month&tqx=out:json`;
+  const budgetRes = await fetch(budgetUrl);
+  const budgetTxt = await budgetRes.text();
+  const budgetJson = JSON.parse(budgetTxt.substr(47).slice(0, -2));
+  const budgetRows = budgetJson.table.rows;
 
-  rows.forEach(r => {
-    const monthMatch =
-      VIEW_MODE === "MONTH"
-        ? r.Month === currentMonth
-        : r.Month.startsWith(CURRENT_MONTH.getFullYear());
-
-    if (!monthMatch) return;
-
-    if (!map[r.Category]) {
-      map[r.Category] = { actual: 0, budget: 0 };
-    }
-
-    map[r.Category].actual += Number(r.Actual_Amount || 0);
-    map[r.Category].budget += Number(r.Budget_Amount || 0);
+  const actualMap = {};
+  actualRows.forEach(r => {
+    if (!r.c[0] || !r.c[1] || !r.c[2]) return;
+    if (r.c[0].v !== currentMonth) return;
+    actualMap[r.c[1].v] = Number(r.c[2].v || 0);
   });
 
-  const labels = [];
-  const values = [];
-  const list = [];
-
-  Object.entries(map).forEach(([cat, v]) => {
-    if (v.actual <= 0) return;
-
-    labels.push(cat);
-    values.push(v.actual);
-
-    list.push({
-      cat,
-      actual: v.actual,
-      budget: v.budget,
-      over: v.actual > v.budget
-    });
+  const budgetMap = {};
+  budgetRows.forEach(r => {
+    if (!r.c[0] || !r.c[1] || !r.c[2]) return;
+    if (r.c[0].v !== currentMonth) return;
+    budgetMap[r.c[1].v] = Number(r.c[2].v || 0);
   });
+
+  const labels = Object.keys(actualMap);
+  const values = labels.map(l => actualMap[l]);
+  const total = values.reduce((a, b) => a + b, 0);
 
   renderCategoryDonut(labels, values);
-  renderCategoryList(list);
+  renderCategoryList(labels, actualMap, budgetMap, total);
 }
 
-/* ===============================
-   DONUT
-================================ */
+/* -------- DONUT -------- */
 function renderCategoryDonut(labels, values) {
-  const ctx = document.getElementById("categoryDonut");
-
+  const ctx = document.getElementById("categoryDonut").getContext("2d");
   if (categoryChart) categoryChart.destroy();
 
   categoryChart = new Chart(ctx, {
@@ -579,747 +871,496 @@ function renderCategoryDonut(labels, values) {
       datasets: [{
         data: values,
         backgroundColor: [
-          "#5B6EFF",
-          "#34C759",
-          "#FF9F0A",
-          "#FF453A",
-          "#8E8E93",
-          "#64D2FF"
+          "#0a84ff",
+          "#30d158",
+          "#ff9f0a",
+          "#bf5af2",
+          "#64d2ff",
+          "#ff453a",
+          "#ffd60a"
         ]
       }]
     },
     options: {
+      cutout: "70%",
       plugins: {
-        legend: { display: false }
-      },
-      cutout: "70%"
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: c => `${c.label}: ₹${c.raw.toLocaleString("en-IN")}`
+          }
+        }
+      }
     }
   });
 }
 
-/* ===============================
-   LIST
-================================ */
-function renderCategoryList(items) {
+/* -------- LIST -------- */
+function renderCategoryList(labels, actualMap, budgetMap, total) {
   const box = document.getElementById("categoryList");
   box.innerHTML = "";
 
-  items
-    .sort((a,b) => b.actual - a.actual)
-    .forEach(i => {
-      const row = document.createElement("div");
-      row.className = "category-row " + (i.over ? "over" : "ok");
-
-      row.innerHTML = `
-        <span class="category-name">${i.cat}</span>
-        <span class="category-amt">${money(i.actual)}</span>
-      `;
-
-      box.appendChild(row);
-    });
-}
-</script>
-
-  <!-- ===============================
-     EMI DETAILS
-================================ -->
-<section class="card">
-  <h3 class="section-title">EMI Commitments</h3>
-
-  <div id="emiSummary" class="emi-summary"></div>
-
-  <div id="emiList" class="emi-list"></div>
-</section>
-
-<style>
-.emi-summary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-  gap: 14px;
-  margin-bottom: 20px;
-}
-
-.emi-box {
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.06);
-}
-
-.emi-box span {
-  display: block;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.emi-box strong {
-  font-size: 18px;
-  margin-top: 4px;
-  display: block;
-}
-
-.emi-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.emi-row {
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 10px;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.04);
-  font-size: 14px;
-}
-
-@media(max-width:768px){
-  .emi-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-}
-
-.emi-name {
-  font-weight: 500;
-}
-
-.emi-danger {
-  color: var(--accent-red);
-}
-
-.emi-ok {
-  color: var(--accent-green);
-}
-</style>
-
-<script>
-/* ===============================
-   EMI LOADER
-================================ */
-async function loadEMIs() {
-  const rows = await fetchSheet("EMI_Master");
-
-  let totalMonthly = 0;
-  let remainingTotal = 0;
-  let nextEmi = null;
-
-  const today = new Date();
-
-  const listBox = document.getElementById("emiList");
-  listBox.innerHTML = "";
-
-  rows.forEach(r => {
-    if (Number(r.Months_Remaining) <= 0) return;
-
-    totalMonthly += Number(r.Monthly_Amount || 0);
-    remainingTotal += Number(r.Remaining_Liability || 0);
-
-    // Calculate next due date
-    const dueDay = Number(r.Due_Day || 1);
-    let dueDate = new Date(today.getFullYear(), today.getMonth(), dueDay);
-    if (dueDate < today) {
-      dueDate = new Date(today.getFullYear(), today.getMonth() + 1, dueDay);
-    }
-
-    const daysLeft = Math.ceil(
-      (dueDate - today) / (1000 * 60 * 60 * 24)
-    );
-
-    if (!nextEmi || daysLeft < nextEmi.daysLeft) {
-      nextEmi = {
-        name: r.EMI_Name,
-        daysLeft,
-        amount: r.Monthly_Amount
-      };
-    }
+  labels.forEach(cat => {
+    const actual = actualMap[cat];
+    const budget = budgetMap[cat] || 0;
+    const over = actual > budget && budget > 0;
 
     const row = document.createElement("div");
-    row.className = "emi-row";
+    row.className = "category-row";
 
     row.innerHTML = `
-      <div class="emi-name">${r.EMI_Name}</div>
-      <div>${money(r.Monthly_Amount)} / month</div>
-      <div>${r.Months_Remaining} months left</div>
-      <div class="${daysLeft <= 7 ? 'emi-danger' : 'emi-ok'}">
-        Due in ${daysLeft} days
+      <div class="category-name">${cat}</div>
+      <div class="category-amt ${over ? "category-over" : "category-ok"}">
+        ₹${actual.toLocaleString("en-IN")}
+        <span style="color:var(--text-muted); font-size:12px;">
+          (${((actual / total) * 100).toFixed(1)}%)
+        </span>
       </div>
-    `;
-
-    listBox.appendChild(row);
-  });
-
-  /* Summary */
-  const summary = document.getElementById("emiSummary");
-  summary.innerHTML = `
-    <div class="emi-box">
-      <span>Monthly EMI Load</span>
-      <strong>${money(totalMonthly)}</strong>
-    </div>
-
-    <div class="emi-box">
-      <span>Remaining EMI Liability</span>
-      <strong>${money(remainingTotal)}</strong>
-    </div>
-
-    <div class="emi-box">
-      <span>Next EMI</span>
-      <strong>
-        ${nextEmi ? nextEmi.name : "—"}
-      </strong>
-      <span>
-        ${nextEmi ? `${nextEmi.daysLeft} days · ${money(nextEmi.amount)}` : ""}
-      </span>
-    </div>
-  `;
-}
-</script>
-
-  <!-- ===============================
-     ACCOUNT BALANCES
-================================ -->
-<section class="card">
-  <h3 class="section-title">Account Balances</h3>
-
-  <div id="accountList" class="account-list"></div>
-</section>
-
-<style>
-.account-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.account-row {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 10px;
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.05);
-  align-items: center;
-}
-
-@media(max-width:768px){
-  .account-row {
-    grid-template-columns: 1fr;
-    gap: 6px;
-  }
-}
-
-.account-name {
-  font-weight: 500;
-}
-
-.account-balance {
-  font-weight: 600;
-}
-
-.account-ok {
-  color: var(--accent-green);
-}
-
-.account-low {
-  color: var(--accent-orange);
-}
-
-.account-critical {
-  color: var(--accent-red);
-}
-
-.account-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-</style>
-
-<script>
-/* ===============================
-   ACCOUNT BALANCE LOADER
-================================ */
-async function loadAccounts() {
-  const rows = await fetchSheet("Account_Balances_Live");
-  const box = document.getElementById("accountList");
-  box.innerHTML = "";
-
-  rows.forEach(r => {
-    const bal = Number(r.Live_Balance || 0);
-    const safe = Number(r.Safe_Limit || 1500);
-
-    let statusClass = "account-ok";
-    let hint = "Balance healthy";
-
-    if (bal <= 0) {
-      statusClass = "account-critical";
-      hint = "Critical balance – action required";
-    } else if (bal < safe) {
-      statusClass = "account-low";
-      hint = `Below safe limit ₹${safe.toLocaleString("en-IN")}`;
-    }
-
-    const row = document.createElement("div");
-    row.className = "account-row";
-
-    row.innerHTML = `
-      <div class="account-name">${r.Account}</div>
-      <div class="account-balance ${statusClass}">
-        ${money(bal)}
-      </div>
-      <div class="account-hint">${hint}</div>
     `;
 
     box.appendChild(row);
   });
 }
+
+/* -------- TOGGLE REFRESH -------- */
+const _setView7 = setView;
+setView = function(v) {
+  _setView7(v);
+  loadCategories();
+};
+
+loadCategories();
 </script>
 
-  <!-- ===============================
-     AI INSIGHTS
-================================ -->
-<section class="card">
-  <h3 class="section-title">AI Insights</h3>
+  <!-- =========================
+     EMI SECTION
+     ========================= -->
 
-  <div id="aiInsights" class="ai-list"></div>
+<section style="margin-top:28px;">
+  <div class="card">
+    <div class="section-title">EMI Commitments</div>
+
+    <div id="emiGrid" style="
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+      gap:16px;
+    "></div>
+  </div>
 </section>
 
 <style>
-.ai-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+.emi-card {
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,.06);
 }
 
-.ai-item {
-  padding: 14px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.05);
-  border-left: 5px solid transparent;
-}
-
-.ai-item.high {
-  border-color: var(--accent-red);
-}
-
-.ai-item.medium {
-  border-color: var(--accent-orange);
-}
-
-.ai-item.low {
-  border-color: var(--accent-green);
-}
-
-.ai-title {
+.emi-name {
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.ai-text {
-  font-size: 14px;
+.emi-amt {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.emi-meta {
+  font-size: 12px;
   color: var(--text-muted);
+  margin-top: 6px;
 }
 
-.ai-action {
-  margin-top: 6px;
-  font-size: 13px;
-  color: var(--accent-blue);
+.emi-danger { color: var(--accent-red); }
+.emi-warn   { color: var(--accent-orange); }
+.emi-ok     { color: var(--accent-green); }
+
+.emi-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.emi-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#0a84ff,#30d158);
 }
 </style>
 
 <script>
-/* ===============================
-   AI INSIGHT ENGINE
-================================ */
-async function loadAIInsights() {
-  const insights = [];
+/* =========================
+   EMI ENGINE
+================================
+Expected EMI_Master columns:
+A EMI_Name
+C Total_Months
+D Monthly_Amount
+E Due_Day (1-31)
+F Months_Paid
+G Months_Remaining
+H Status (ONGOING ⏳ / COMPLETED ✅)
+*/
+
+async function loadEMIs(){
+  const url =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=EMI_Master&tqx=out:json`;
+  const res = await fetch(url);
+  const txt = await res.text();
+  const json = JSON.parse(txt.substr(47).slice(0,-2));
+  const rows = json.table.rows || [];
+
+  const grid = document.getElementById("emiGrid");
+  grid.innerHTML = "";
+
   const today = new Date();
 
-  /* ---------- BALANCE RISK ---------- */
-  const accounts = await fetchSheet("Account_Balances_Live");
+  rows.forEach(r=>{
+    if (!r.c || !r.c[0] || !r.c[7]) return;
+    if (r.c[7].v !== "ONGOING ⏳") return;
 
-  accounts.forEach(a => {
-    const bal = Number(a.Live_Balance || 0);
-    const safe = Number(a.Safe_Limit || 1500);
+    const name = r.c[0].v;
+    const total = Number(r.c[2]?.v || 0);
+    const monthly = Number(r.c[3]?.v || 0);
+    const dueDay = Number(r.c[4]?.v || 1);
+    const paid = Number(r.c[5]?.v || 0);
+    const remaining = Number(r.c[6]?.v || 0);
 
-    if (bal < safe) {
-      insights.push({
-        level: bal <= 0 ? "high" : "medium",
-        title: `Low Balance – ${a.Account}`,
-        text:
-          `Current balance ${money(bal)} is below the safe limit ${money(safe)}.`,
-        action:
-          "Consider transferring funds from another account."
-      });
-    }
-  });
-
-  /* ---------- BUDGET OVERRUN ---------- */
-  const budgets = await fetchSheet("Budget_vs_Actual");
-  const month = formatMonthYYYYMM(CURRENT_MONTH);
-
-  budgets.forEach(b => {
-    if (VIEW_MODE === "MONTH" && b.Month !== month) return;
-
-    if (Number(b.Actual_Amount) > Number(b.Budget_Amount)) {
-      insights.push({
-        level: "medium",
-        title: `Overspent – ${b.Category}`,
-        text:
-          `Spent ${money(b.Actual_Amount)} against budget ${money(b.Budget_Amount)}.`,
-        action:
-          "Reduce discretionary spend in this category."
-      });
-    }
-  });
-
-  /* ---------- EMI STRESS ---------- */
-  const emis = await fetchSheet("EMI_Master");
-
-  emis.forEach(e => {
-    if (Number(e.Months_Remaining) <= 0) return;
-
-    const dueDay = Number(e.Due_Day || 1);
+    /* Next due date */
     let due = new Date(today.getFullYear(), today.getMonth(), dueDay);
-    if (due < today) {
-      due = new Date(today.getFullYear(), today.getMonth() + 1, dueDay);
+    if (due < today) due = new Date(today.getFullYear(), today.getMonth()+1, dueDay);
+
+    const daysLeft = Math.ceil((due - today)/(1000*60*60*24));
+
+    /* Stress */
+    let stressClass = "emi-ok";
+    let stressText = "On track";
+    if (daysLeft <= 5) {
+      stressClass = "emi-danger";
+      stressText = "Due very soon";
+    } else if (daysLeft <= 10) {
+      stressClass = "emi-warn";
+      stressText = "Upcoming";
     }
 
-    const daysLeft = Math.ceil(
-      (due - today) / (1000 * 60 * 60 * 24)
-    );
+    const progress = total ? Math.min((paid/total)*100,100) : 0;
 
-    if (daysLeft <= 7) {
-      insights.push({
-        level: "high",
-        title: `Upcoming EMI – ${e.EMI_Name}`,
-        text:
-          `EMI of ${money(e.Monthly_Amount)} is due in ${daysLeft} days.`,
-        action:
-          "Ensure sufficient balance before due date."
-      });
-    }
+    const card = document.createElement("div");
+    card.className = "emi-card";
+
+    card.innerHTML = `
+      <div class="emi-name">${name}</div>
+      <div class="emi-amt">₹${monthly.toLocaleString("en-IN")}</div>
+
+      <div class="emi-meta">
+        ${remaining} months remaining · Due in
+        <span class="${stressClass}">${daysLeft} days</span>
+      </div>
+
+      <div class="emi-meta ${stressClass}">
+        ${stressText}
+      </div>
+
+      <div class="emi-bar">
+        <div class="emi-fill" style="width:${progress.toFixed(1)}%"></div>
+      </div>
+
+      <div class="emi-meta">
+        Paid ${paid}/${total} months
+      </div>
+    `;
+
+    grid.appendChild(card);
   });
 
-  renderAIInsights(insights.slice(0, 4));
+  if (!grid.children.length){
+    grid.innerHTML = `
+      <div class="emi-meta">No active EMIs 🎉</div>
+    `;
+  }
 }
 
-/* ===============================
-   RENDER INSIGHTS
+/* Refresh-safe */
+loadEMIs();
+</script>
+<!-- =========================
+     AI INSIGHTS
+     ========================= -->
+
+<section style="margin-top:28px;">
+  <div class="card">
+    <div class="section-title">AI Insights</div>
+    <div id="aiInsights" style="
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    "></div>
+  </div>
+</section>
+
+<style>
+.insight {
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: rgba(255,255,255,.06);
+  border-left: 5px solid transparent;
+}
+
+.insight-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.insight-text {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.insight-action {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--accent-blue);
+}
+
+.insight.high   { border-color: var(--accent-red); }
+.insight.medium { border-color: var(--accent-orange); }
+.insight.low    { border-color: var(--accent-green); }
+</style>
+
+<script>
+/* =========================
+   AI INSIGHT ENGINE
 ================================ */
-function renderAIInsights(items) {
+
+async function loadAIInsights(){
   const box = document.getElementById("aiInsights");
   box.innerHTML = "";
 
-  if (items.length === 0) {
+  const insights = [];
+
+  /* -------- LOW BALANCE RISK -------- */
+  const accUrl =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Account_Balances_Live&tqx=out:json`;
+  const accRes = await fetch(accUrl);
+  const accTxt = await accRes.text();
+  const accJson = JSON.parse(accTxt.substr(47).slice(0,-2));
+  const accRows = accJson.table.rows || [];
+
+  accRows.forEach(r=>{
+    if (!r.c || !r.c[0] || !r.c[4]) return;
+    const name = r.c[0].v;
+    const bal = Number(r.c[4].v || 0);
+    const safe = Number(r.c[5]?.v || 1500);
+
+    if (bal < safe){
+      insights.push({
+        level: bal <= 0 ? "high" : "medium",
+        title: `Low balance – ${name}`,
+        text: `Available balance ₹${bal.toLocaleString("en-IN")} is below safe level ₹${safe.toLocaleString("en-IN")}.`,
+        action: "Consider moving funds from another account."
+      });
+    }
+  });
+
+  /* -------- BUDGET OVERRUN -------- */
+  const budUrl =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=Budget_vs_Actual&tqx=out:json`;
+  const budRes = await fetch(budUrl);
+  const budTxt = await budRes.text();
+  const budJson = JSON.parse(budTxt.substr(47).slice(0,-2));
+  const budRows = budJson.table.rows || [];
+
+  const now = new Date();
+  const currentMonth =
+    now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+
+  budRows.forEach(r=>{
+    if (!r.c || !r.c[0] || !r.c[1] || !r.c[2] || !r.c[3]) return;
+    if (CURRENT_VIEW === "MONTH" && r.c[0].v !== currentMonth) return;
+    if (CURRENT_VIEW === "YTD" && !r.c[0].v.startsWith(String(now.getFullYear()))) return;
+
+    const cat = r.c[1].v;
+    const budget = Number(r.c[2].v || 0);
+    const actual = Number(r.c[3].v || 0);
+
+    if (actual > budget && budget > 0){
+      insights.push({
+        level: "medium",
+        title: `Overspent – ${cat}`,
+        text: `Spent ₹${actual.toLocaleString("en-IN")} against budget ₹${budget.toLocaleString("en-IN")}.`,
+        action: "Reduce discretionary spending in this category."
+      });
+    }
+  });
+
+  /* -------- EMI STRESS -------- */
+  const emiUrl =
+    `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=EMI_Master&tqx=out:json`;
+  const emiRes = await fetch(emiUrl);
+  const emiTxt = await emiRes.text();
+  const emiJson = JSON.parse(emiTxt.substr(47).slice(0,-2));
+  const emiRows = emiJson.table.rows || [];
+
+  const today = new Date();
+
+  emiRows.forEach(r=>{
+    if (!r.c || !r.c[0] || r.c[7]?.v !== "ONGOING ⏳") return;
+
+    const name = r.c[0].v;
+    const amt = Number(r.c[3]?.v || 0);
+    const dueDay = Number(r.c[4]?.v || 1);
+
+    let due = new Date(today.getFullYear(), today.getMonth(), dueDay);
+    if (due < today) due = new Date(today.getFullYear(), today.getMonth()+1, dueDay);
+
+    const daysLeft = Math.ceil((due - today)/(1000*60*60*24));
+
+    if (daysLeft <= 7){
+      insights.push({
+        level: "high",
+        title: `Upcoming EMI – ${name}`,
+        text: `EMI of ₹${amt.toLocaleString("en-IN")} is due in ${daysLeft} days.`,
+        action: "Ensure sufficient balance before due date."
+      });
+    }
+  });
+
+  /* -------- RENDER -------- */
+  if (insights.length === 0){
     box.innerHTML = `
-      <div class="ai-item low">
-        <div class="ai-title">All Clear 👍</div>
-        <div class="ai-text">
-          No financial risks detected at the moment.
+      <div class="insight low">
+        <div class="insight-title">All clear 👍</div>
+        <div class="insight-text">
+          No financial risks detected right now.
         </div>
       </div>
     `;
     return;
   }
 
-  items.forEach(i => {
+  insights.slice(0,4).forEach(i=>{
     const div = document.createElement("div");
-    div.className = `ai-item ${i.level}`;
-
+    div.className = `insight ${i.level}`;
     div.innerHTML = `
-      <div class="ai-title">${i.title}</div>
-      <div class="ai-text">${i.text}</div>
-      <div class="ai-action">${i.action}</div>
+      <div class="insight-title">${i.title}</div>
+      <div class="insight-text">${i.text}</div>
+      <div class="insight-action">${i.action}</div>
     `;
-
     box.appendChild(div);
   });
 }
+
+/* INIT */
+loadAIInsights();
 </script>
 
-  <!-- ===============================
-     SPENDING BEHAVIOUR
-================================ -->
-<section class="card">
-  <h3 class="section-title">Spending Behaviour</h3>
+  <script>
+/* =========================
+   APP BOOTSTRAP SEQUENCE
+   ========================= */
 
-  <div class="spend-toggle">
-    <button onclick="setSpendDays(7)">Last 7 Days</button>
-    <button onclick="setSpendDays(15)">Last 15 Days</button>
-  </div>
+async function initApp() {
+  console.log("🔵 Initialising Finance App…");
 
-  <div id="spendingList" class="spending-list"></div>
-</section>
+  try {
+    await fetchKPIs();
+    await loadBudgetBar();
+    await loadExpenseTrend();
+    await loadCategories();
+    await loadEMIs();
+    await loadAIInsights();
 
-<style>
-.spend-toggle {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.spend-toggle button {
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  background: transparent;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.spend-toggle button:hover {
-  color: var(--text-main);
-  border-color: var(--accent-blue);
-}
-
-.spending-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.spend-row {
-  display: grid;
-  grid-template-columns: 80px 1fr auto;
-  gap: 12px;
-  padding: 12px;
-  border-radius: var(--radius-md);
-  background: rgba(255,255,255,0.04);
-  font-size: 14px;
-}
-
-@media(max-width:768px){
-  .spend-row {
-    grid-template-columns: 70px 1fr auto;
+    console.log("✅ App fully loaded");
+  } catch (e) {
+    console.error("❌ App load error", e);
   }
 }
 
-.spend-date {
-  font-weight: 500;
-  color: var(--accent-blue);
-}
+/* Hook login success → app init */
+const originalAttemptLogin = attemptLogin;
+attemptLogin = function() {
+  originalAttemptLogin();
 
-.spend-cat {
-  font-size: 14px;
-}
+  // If login succeeded, lock screen removed
+  setTimeout(() => {
+    if (!document.getElementById("lockScreen")) {
+      initApp();
+    }
+  }, 700);
+};
+  </script>
 
-.spend-amt {
-  font-weight: 600;
-  color: var(--accent-red);
-}
-</style>
+  <script>
+/* =========================
+   GLOBAL REFRESH ON TOGGLE
+   ========================= */
 
-<script>
-let SPEND_DAYS = 7;
+const originalSetViewFinal = setView;
+setView = function(view) {
+  originalSetViewFinal(view);
 
-/* ===============================
-   SET DAYS
-================================ */
-function setSpendDays(days) {
-  SPEND_DAYS = days;
-  loadSpendingBehaviour();
-}
+  fetchKPIs();
+  loadBudgetBar();
+  loadExpenseTrend();
+  loadCategories();
+  loadAIInsights();
+};
+  </script>
 
-/* ===============================
-   LOAD SPENDING
-================================ */
-async function loadSpendingBehaviour() {
-  const rows = await fetchSheet("Txn_Clean");
-  const today = new Date();
+  <script>
+/* =========================
+   PWA INSTALL HANDLER
+   ========================= */
 
-  let startDate;
-
-  if (VIEW_MODE === "MONTH") {
-    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-  } else {
-    startDate = new Date(today.getFullYear(), 0, 1);
-  }
-
-  const cutoff = new Date(today);
-  cutoff.setDate(today.getDate() - SPEND_DAYS);
-
-  const list = document.getElementById("spendingList");
-  list.innerHTML = "";
-
-  const filtered = rows
-    .filter(r => {
-      if (!r.Txn_Date) return false;
-
-      const d = new Date(r.Txn_Date);
-      if (d < startDate || d > today) return false;
-      if (d < cutoff) return false;
-      if (Number(r.Signed_Amount) >= 0) return false;
-
-      return true;
-    })
-    .sort((a,b) => new Date(b.Txn_Date) - new Date(a.Txn_Date));
-
-  if (filtered.length === 0) {
-    list.innerHTML = `
-      <div class="spend-row">
-        <div class="spend-cat">No expenses recorded</div>
-      </div>
-    `;
-    return;
-  }
-
-  filtered.forEach(t => {
-    const d = new Date(t.Txn_Date);
-
-    const row = document.createElement("div");
-    row.className = "spend-row";
-
-    row.innerHTML = `
-      <div class="spend-date">
-        ${d.toLocaleDateString("en-IN",{day:"2-digit",month:"short"})}
-      </div>
-      <div class="spend-cat">
-        ${t.Category}
-      </div>
-      <div class="spend-amt">
-        ${money(Math.abs(t.Signed_Amount))}
-      </div>
-    `;
-
-    list.appendChild(row);
-  });
-}
-</script>
-<!-- ===============================
-     FOOTER
-================================ -->
-<footer class="app-footer">
-  <div class="footer-left">
-    <strong>Kaiwalya’s Finance Dashboard</strong>
-    <div class="footer-sub">
-      Built for clarity · Updated live from Google Sheets
-    </div>
-  </div>
-
-  <div class="footer-right">
-    <button onclick="refreshDashboard()" class="refresh-btn">
-      ↻ Refresh
-    </button>
-  </div>
-</footer>
-
-<style>
-/* ===============================
-   FOOTER
-================================ */
-.app-footer {
-  margin-top: 40px;
-  padding: 20px 10px 30px;
-  border-top: 1px solid var(--border-soft);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.footer-sub {
-  margin-top: 4px;
-  font-size: 12px;
-}
-
-.refresh-btn {
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  background: transparent;
-  color: var(--text-main);
-  cursor: pointer;
-}
-
-.refresh-btn:hover {
-  border-color: var(--accent-blue);
-  color: var(--accent-blue);
-}
-
-/* ===============================
-   PWA INSTALL PROMPT
-================================ */
-#pwaPrompt {
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(20,22,30,0.95);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: 14px 18px;
-  display: none;
-  align-items: center;
-  gap: 14px;
-  z-index: 999;
-}
-
-#pwaPrompt button {
-  background: var(--accent-blue);
-  border: none;
-  color: #fff;
-  border-radius: 999px;
-  padding: 6px 14px;
-  cursor: pointer;
-}
-</style>
-
-<div id="pwaPrompt">
-  <div>
-    <strong>Install Dashboard</strong>
-    <div class="footer-sub">Use it like a real app</div>
-  </div>
-  <button id="installBtn">Install</button>
-</div>
-
-<script>
-/* ===============================
-   FINAL WIRING
-================================ */
-
-/* Re-run everything cleanly */
-async function refreshDashboard() {
-  console.log("Refreshing dashboard…");
-
-  await loadKPIs();
-  await loadBudgetBar();
-  await loadExpenseTrend();
-  await loadCategories();
-  await loadEMIs();
-  await loadAccounts();
-  await loadAIInsights();
-  await loadSpendingBehaviour();
-}
-
-/* ===============================
-   PWA INSTALL SUPPORT
-================================ */
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt", e => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById("pwaPrompt").style.display = "flex";
+
+  const btn = document.createElement("button");
+  btn.innerText = "Install App";
+  btn.style.cssText = `
+    position: fixed;
+    bottom: 18px;
+    right: 18px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: var(--accent-blue);
+    color: white;
+    border: none;
+    z-index: 999;
+    box-shadow: 0 10px 30px rgba(10,132,255,.4);
+  `;
+
+  btn.onclick = async () => {
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    btn.remove();
+  };
+
+  document.body.appendChild(btn);
 });
+  </script>
 
-document.getElementById("installBtn").onclick = async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  document.getElementById("pwaPrompt").style.display = "none";
-};
+  <script>
+/* =========================
+   AUTO REFRESH (10 MIN)
+   ========================= */
+setInterval(() => {
+  console.log("🔁 Auto refresh");
+  fetchKPIs();
+  loadBudgetBar();
+  loadExpenseTrend();
+  loadCategories();
+  loadAIInsights();
+}, 10 * 60 * 1000);
+  </script>
 
-/* ===============================
-   AUTO REFRESH (OPTIONAL)
-================================ */
-// Refresh every 10 minutes
-setInterval(refreshDashboard, 10 * 60 * 1000);
-</script>
-
-</div> <!-- END app-container -->
-</body>
+  </body>
 </html>
+  
+  
   
