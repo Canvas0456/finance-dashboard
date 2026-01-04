@@ -1,253 +1,222 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Kaiwalya • Finance Control</title>
 
-<!-- Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<!-- Chart -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* ================================
-   🌗 APPLE-LIKE GLOSSY THEME
-================================ */
-
 :root {
-  --bg-main: #0b0f14;
-  --bg-glass: rgba(255,255,255,0.08);
-  --bg-glass-strong: rgba(255,255,255,0.12);
-  --border-glass: rgba(255,255,255,0.18);
+  --bg: #0b0f14;
+  --glass: rgba(255,255,255,0.08);
+  --glass-strong: rgba(255,255,255,0.14);
+  --border: rgba(255,255,255,0.18);
 
-  --text-primary: #f9fafb;
-  --text-secondary: rgba(255,255,255,0.65);
-  --text-muted: rgba(255,255,255,0.4);
+  --text: #f9fafb;
+  --muted: rgba(255,255,255,0.6);
+  --dim: rgba(255,255,255,0.4);
 
-  --accent-blue: #5aa2ff;
-  --accent-teal: #3dd6c6;
-  --accent-amber: #fbbf24;
-  --accent-red: #ef4444;
+  --blue: #5aa2ff;
+  --teal: #3dd6c6;
+  --amber: #fbbf24;
+  --red: #ef4444;
+  --green: #22c55e;
 
-  --radius-xl: 26px;
-  --radius-lg: 20px;
-  --radius-md: 14px;
-
-  --blur-heavy: blur(28px);
-  --blur-light: blur(14px);
-
-  --shadow-glow:
-    0 0 0 rgba(0,0,0,0),
-    0 20px 40px rgba(0,0,0,0.45);
-
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --radius: 22px;
+  --blur: blur(28px);
+  --ease: cubic-bezier(0.4,0,0.2,1);
 }
 
-/* ===== RESET ===== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-}
+* { box-sizing: border-box; margin:0; padding:0; }
 
 body {
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont;
+  font-family: Inter, system-ui;
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(90,162,255,0.15), transparent),
-    radial-gradient(900px 500px at 90% 10%, rgba(61,214,198,0.12), transparent),
-    var(--bg-main);
-  color: var(--text-primary);
+    radial-gradient(1200px 600px at 10% -10%, rgba(90,162,255,.18), transparent),
+    radial-gradient(900px 500px at 90% 10%, rgba(61,214,198,.14), transparent),
+    var(--bg);
+  color: var(--text);
   min-height: 100vh;
-  overflow-x: hidden;
 }
 
-/* ===== CONTAINER ===== */
 .container {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 28px 22px;
+  max-width: 1200px;
+  margin: auto;
+  padding: 26px 22px;
 }
 
-/* ===== GLASS CARD ===== */
 .glass {
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.14),
-    rgba(255,255,255,0.05)
-  );
-  backdrop-filter: var(--blur-heavy);
-  -webkit-backdrop-filter: var(--blur-heavy);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-glass);
-  box-shadow: var(--shadow-glow);
+  background: linear-gradient(180deg, var(--glass-strong), var(--glass));
+  backdrop-filter: var(--blur);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 22px;
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.6s var(--ease-smooth),
-              box-shadow 0.6s var(--ease-smooth);
+  box-shadow: 0 20px 50px rgba(0,0,0,.5);
+  transition: transform .6s var(--ease);
 }
 
-/* subtle floating effect */
 .glass:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    0 30px 60px rgba(0,0,0,0.55),
-    0 0 0 rgba(0,0,0,0);
+  transform: translateY(-4px);
 }
 
-/* ===== SHIMMER LIGHT ===== */
-.glass::before {
-  content: "";
-  position: absolute;
-  inset: -40%;
-  background:
-    linear-gradient(
-      120deg,
-      transparent 40%,
-      rgba(255,255,255,0.15),
-      transparent 60%
-    );
-  transform: translateX(-100%);
-  animation: shimmer 8s infinite;
-}
+.h1 { font-size: 26px; font-weight: 700; }
+.h2 { font-size: 18px; font-weight: 600; }
+.sub { color: var(--muted); font-size: 14px; }
+.muted { color: var(--dim); font-size: 13px; }
 
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
-  100% { transform: translateX(100%); }
-}
-
-/* ===== TEXT STYLES ===== */
-.h1 {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.4px;
-}
-
-.h2 {
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.muted {
-  color: var(--text-muted);
-  font-size: 13px;
-}
-
-.subtle {
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-/* ===== BUTTONS (iOS STYLE) ===== */
 .btn {
-  padding: 10px 18px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: var(--blur-light);
-  border: 1px solid var(--border-glass);
-  color: var(--text-primary);
-  font-weight: 600;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--text);
   cursor: pointer;
-  transition: all 0.4s var(--ease-smooth);
+  transition: .4s var(--ease);
 }
 
 .btn.active {
-  background: linear-gradient(
-    135deg,
-    var(--accent-blue),
-    var(--accent-teal)
-  );
-  border-color: transparent;
-  color: #fff;
+  background: linear-gradient(135deg, var(--blue), var(--teal));
+  border: none;
 }
 
-.btn:hover {
-  transform: scale(1.05);
+.fade {
+  animation: fade .8s var(--ease) forwards;
 }
 
-/* ===== ANIMATION HELPERS ===== */
-.fade-in {
-  animation: fadeIn 1s var(--ease-smooth) forwards;
+@keyframes fade {
+  from { opacity:0; transform: translateY(10px); }
+  to { opacity:1; transform:none; }
 }
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
 </style>
 </head>
 
 <body>
 
-<!-- CONTENT WILL BE ADDED PART BY PART -->
+<!-- PARTS WILL BE ADDED BELOW -->
 
+<script>
+/* =========================================================
+   🔌 GOOGLE SHEETS LIVE DATA CONNECTOR
+   (CRITICAL – DO NOT MODIFY UNLESS ASKED)
+========================================================= */
 
-<!-- ================================
-     🧊 HERO / TODAY PANEL
-================================ -->
-<header class="container fade-in">
+/*
+Your Google Sheet ID
+Confirmed and locked
+*/
+const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
+
+/*
+IMPORTANT REQUIREMENTS (already satisfied by you):
+✔ File → Share → Publish to web
+✔ Entire document published
+✔ Anyone with link can view
+*/
+
+/*
+This function fetches ANY sheet by name
+Usage example:
+fetchSheet("Txn_Clean")
+*/
+async function fetchSheet(sheetName) {
+  try {
+    const url =
+      `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=${encodeURIComponent(sheetName)}&tqx=out:json`;
+
+    const response = await fetch(url);
+    const text = await response.text();
+
+    // Google adds extra characters before JSON → strip them
+    const json = JSON.parse(text.substring(47).slice(0, -2));
+
+    return json.table.rows || [];
+  } catch (error) {
+    console.error(`❌ Error loading sheet: ${sheetName}`, error);
+    return [];
+  }
+}
+
+/*
+GLOBAL STATE
+Used by Month / YTD toggle everywhere
+*/
+let MODE = "MONTH";
+
+/*
+Universal reload hook
+Every section attaches to this
+*/
+function reloadAll() {
+  console.log("🔄 Reloading dashboard for mode:", MODE);
+}
+
+/*
+Safety: auto-reload once page is fully ready
+*/
+window.addEventListener("load", () => {
+  reloadAll();
+});
+</script>
+
+   <!-- =========================================================
+     🧊 HERO HEADER
+========================================================= -->
+<header class="container fade">
 
   <div class="glass" style="
-    display: grid;
+    display:grid;
     grid-template-columns: 1fr auto;
-    gap: 22px;
+    gap: 18px;
     align-items: center;
   ">
 
-    <!-- LEFT: TITLE + DATE + THOUGHT -->
+    <!-- LEFT: TITLE + SUBTITLE + THOUGHT -->
     <div>
-      <div class="muted" id="todayDateText">—</div>
-
-      <div class="h1" style="margin-top: 6px;">
-        Finance Control Center
-      </div>
-
-      <div class="subtle" style="margin-top: 4px;">
+      <div class="h1">Kaiwalya’s Finance Dashboard</div>
+      <div class="sub" style="margin-top:6px;">
         Calm clarity for everyday money decisions
       </div>
 
-      <!-- Thought pill -->
-      <div id="thoughtPill" style="
-        margin-top: 14px;
-        display: inline-block;
-        padding: 10px 16px;
-        border-radius: 999px;
+      <!-- Thought of the day -->
+      <div id="thoughtBox" style="
+        margin-top:14px;
+        display:inline-block;
+        padding:10px 16px;
+        border-radius:999px;
         background: rgba(255,255,255,0.14);
-        backdrop-filter: var(--blur-light);
-        border: 1px solid var(--border-glass);
-        font-size: 13px;
-        color: var(--text-secondary);
-        max-width: 100%;
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border);
+        font-size:13px;
+        color: var(--muted);
       ">
-        Loading today’s thought…
+        Loading thought of the day…
       </div>
     </div>
 
-    <!-- RIGHT: TOGGLE -->
-    <div style="
-      display: flex;
-      gap: 10px;
-      background: rgba(255,255,255,0.08);
-      padding: 6px;
-      border-radius: 999px;
-      backdrop-filter: var(--blur-light);
-      border: 1px solid var(--border-glass);
-    ">
-      <button class="btn active" id="btnMonth" onclick="setMode('MONTH')">
-        Month
-      </button>
-      <button class="btn" id="btnYTD" onclick="setMode('YTD')">
-        YTD
-      </button>
+    <!-- RIGHT: DATE + TOGGLE -->
+    <div style="text-align:right;">
+      <div id="todayDate" class="muted" style="margin-bottom:10px;">
+        —
+      </div>
+
+      <div style="
+        display:inline-flex;
+        gap:6px;
+        padding:6px;
+        border-radius:999px;
+        background: rgba(255,255,255,0.10);
+        border: 1px solid var(--border);
+      ">
+        <button id="btnMonth" class="btn active"
+          onclick="setMode('MONTH')">Month</button>
+        <button id="btnYTD" class="btn"
+          onclick="setMode('YTD')">YTD</button>
+      </div>
     </div>
 
   </div>
@@ -255,131 +224,101 @@ body {
 </header>
 
 <script>
-/* ===== DATE + GREETING ===== */
-const today = new Date();
-document.getElementById("todayDateText").innerText =
-  today.toLocaleDateString("en-IN", {
+/* =========================================================
+   HEADER LOGIC
+========================================================= */
+
+/* ----- Today Date (fixed) ----- */
+const now = new Date();
+document.getElementById("todayDate").innerText =
+  now.toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
     month: "short",
     year: "numeric"
   });
 
-/* ===== MODE STATE ===== */
-let MODE = "MONTH";
-
+/* ----- Toggle Logic (GLOBAL MODE) ----- */
 function setMode(mode){
   MODE = mode;
 
-  const m = document.getElementById("btnMonth");
-  const y = document.getElementById("btnYTD");
+  document.getElementById("btnMonth")
+    .classList.toggle("active", mode === "MONTH");
 
-  if(mode === "MONTH"){
-    m.classList.add("active");
-    y.classList.remove("active");
-  } else {
-    y.classList.add("active");
-    m.classList.remove("active");
-  }
+  document.getElementById("btnYTD")
+    .classList.toggle("active", mode === "YTD");
 
-  // hooks for later parts
-  if (typeof reloadAll === "function") {
-    reloadAll();
-  }
+  reloadAll(); // 🔁 refresh everything
 }
 
-/* ===== THOUGHT OF THE DAY ===== */
+/* ----- Thought of the Day (Live Internet) ----- */
 async function loadThought(){
-  const pill = document.getElementById("thoughtPill");
-
-  try{
-    const res = await fetch("https://api.quotable.io/random?tags=wisdom|inspirational");
+  const el = document.getElementById("thoughtBox");
+  try {
+    const res = await fetch(
+      "https://api.quotable.io/random?tags=wisdom|inspirational|life"
+    );
     const data = await res.json();
-    pill.innerText = `“${data.content}”`;
-  }catch{
-    pill.innerText = "Small calm decisions compound into financial peace.";
+    el.innerText = `“${data.content}”`;
+  } catch {
+    el.innerText =
+      "Small calm decisions compound into financial peace.";
   }
 }
 
 loadThought();
 </script>
 
-<!-- ================================
-     💰 MONEY POSITION STRIP
-================================ -->
-<section class="container fade-in" style="margin-top: 26px;">
+   <!-- =========================================================
+     💰 MONEY POSITION
+========================================================= -->
+<section class="container fade">
 
   <div class="glass">
-
-    <div class="h2" style="margin-bottom: 14px;">
-      Money Position
+    <div class="h2" style="margin-bottom:10px;">Money Position</div>
+    <div class="sub" style="margin-bottom:16px;">
+      A proportional view of where your money stands right now
     </div>
 
     <!-- STRIP -->
     <div style="
-      display: flex;
-      height: 18px;
-      border-radius: 999px;
-      overflow: hidden;
+      display:flex;
+      height:18px;
+      border-radius:999px;
+      overflow:hidden;
       background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border-glass);
+      border:1px solid var(--border);
     ">
-
-      <div id="segBalance" style="
-        width: 0%;
-        background: linear-gradient(90deg, #5aa2ff, #3dd6c6);
-        transition: width 1.4s var(--ease-smooth);
-      "></div>
-
-      <div id="segExpense" style="
-        width: 0%;
-        background: linear-gradient(90deg, #fbbf24, #f59e0b);
-        transition: width 1.4s var(--ease-smooth);
-      "></div>
-
-      <div id="segEMI" style="
-        width: 0%;
-        background: linear-gradient(90deg, #ef4444, #dc2626);
-        transition: width 1.4s var(--ease-smooth);
-      "></div>
-
-      <div id="segSavings" style="
-        width: 0%;
-        background: linear-gradient(90deg, #22c55e, #16a34a);
-        transition: width 1.4s var(--ease-smooth);
-      "></div>
-
+      <div id="segBalance" style="width:0%; background:linear-gradient(90deg,var(--blue),var(--teal)); transition:width 1.2s var(--ease);"></div>
+      <div id="segExpenses" style="width:0%; background:linear-gradient(90deg,var(--amber),#f59e0b); transition:width 1.2s var(--ease);"></div>
+      <div id="segEMI" style="width:0%; background:linear-gradient(90deg,#fb7185,var(--red)); transition:width 1.2s var(--ease);"></div>
+      <div id="segSavings" style="width:0%; background:linear-gradient(90deg,var(--green),#16a34a); transition:width 1.2s var(--ease);"></div>
     </div>
 
-    <!-- LABELS -->
+    <!-- VALUES -->
     <div style="
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin-top: 14px;
-      font-size: 13px;
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+      gap:14px;
+      margin-top:16px;
+      font-size:13px;
     ">
-
       <div>
-        <div class="muted">Balance</div>
-        <div id="valBalance" style="font-weight:600;">—</div>
+        <div class="muted">Total Balance</div>
+        <div id="valBalance" style="font-weight:700;">—</div>
       </div>
-
       <div>
         <div class="muted">Expenses</div>
-        <div id="valExpenses" style="font-weight:600;">—</div>
+        <div id="valExpenses" style="font-weight:700;">—</div>
       </div>
-
       <div>
-        <div class="muted">EMI</div>
-        <div id="valEMI" style="font-weight:600;">—</div>
+        <div class="muted">EMI Paid</div>
+        <div id="valEMI" style="font-weight:700;">—</div>
       </div>
-
       <div>
-        <div class="muted">Savings</div>
-        <div id="valSavings" style="font-weight:600;">—</div>
+        <div class="muted">Net Savings</div>
+        <div id="valSavings" style="font-weight:700;">—</div>
       </div>
-
     </div>
 
   </div>
@@ -387,52 +326,59 @@ loadThought();
 </section>
 
 <script>
-/* ================================
-   MONEY POSITION LOGIC
-================================ */
-
+/* =========================================================
+   MONEY POSITION — DATA LOGIC
+========================================================= */
 async function loadMoneyPosition(){
-  const sheet =
-    MODE === "MONTH"
-      ? "Dashboard_KPIs_Month"
-      : "Dashboard_KPIs_YTD";
 
-  const rows = await fetchSheet(sheet);
-  const d = {};
+  // Decide KPI sheet based on toggle
+  const kpiSheet = MODE === "MONTH"
+    ? "Dashboard_KPIs_Month"
+    : "Dashboard_KPIs_YTD";
 
+  const rows = await fetchSheet(kpiSheet);
+
+  // Map KPI -> value
+  const k = {};
   rows.forEach(r=>{
-    if(r.c[0] && r.c[1]) d[r.c[0].v] = Number(r.c[1].v) || 0;
+    const key = r.c[0]?.v;
+    const val = Number(r.c[1]?.v) || 0;
+    if(key) k[key] = val;
   });
 
-  const balance = d["Total Balance (All Accounts)"] || 0;
-  const expenses =
-    MODE === "MONTH"
-      ? d["Current Month Expenses"]
-      : d["YTD Expenses"];
+  const balance = k["Total Balance (All Accounts)"] || 0;
 
-  const emi =
-    MODE === "MONTH"
-      ? d["EMI Paid (Current Month)"]
-      : d["EMI Paid (YTD)"];
+  const expenses = MODE === "MONTH"
+    ? k["Current Month Expenses"] || 0
+    : k["YTD Expenses"] || 0;
 
-  const savings =
-    MODE === "MONTH"
-      ? d["Current Month Net Savings"]
-      : d["YTD Net Savings"];
+  const emi = MODE === "MONTH"
+    ? k["EMI Paid (Current Month)"] || 0
+    : k["EMI Paid (YTD)"] || 0;
 
-  const total = Math.max(balance + expenses + emi + Math.abs(savings), 1);
+  const savings = MODE === "MONTH"
+    ? k["Current Month Net Savings"] || 0
+    : k["YTD Net Savings"] || 0;
 
-  /* Percentages */
+  // Avoid divide-by-zero
+  const total = Math.max(
+    balance + expenses + emi + Math.abs(savings),
+    1
+  );
+
+  // Percentages
   const pBal = (balance / total) * 100;
   const pExp = (expenses / total) * 100;
   const pEmi = (emi / total) * 100;
   const pSav = (Math.abs(savings) / total) * 100;
 
+  // Animate bars
   document.getElementById("segBalance").style.width = pBal + "%";
-  document.getElementById("segExpense").style.width = pExp + "%";
+  document.getElementById("segExpenses").style.width = pExp + "%";
   document.getElementById("segEMI").style.width = pEmi + "%";
   document.getElementById("segSavings").style.width = pSav + "%";
 
+  // Numbers
   document.getElementById("valBalance").innerText =
     "₹" + balance.toLocaleString("en-IN");
 
@@ -446,100 +392,87 @@ async function loadMoneyPosition(){
     "₹" + savings.toLocaleString("en-IN");
 }
 
-/* Global reload hook */
-function reloadAll(){
+/* Attach to global reload */
+const _reload4 = reloadAll;
+reloadAll = function(){
+  _reload4();
   loadMoneyPosition();
-}
+};
 
-/* Initial */
+/* Initial load */
 loadMoneyPosition();
 </script>
 
-  <!-- ================================
-     📈 BUDGET STORY RAIL
-================================ -->
-<section class="container fade-in" style="margin-top: 28px;">
+ <!-- =========================================================
+     📊 BUDGET UTILISATION
+========================================================= -->
+<section class="container fade">
+
   <div class="glass">
-
-    <div class="h2" style="margin-bottom: 8px;">
-      Budget Story
-    </div>
-
-    <div id="budgetNarrative" class="subtle" style="margin-bottom: 16px;">
+    <div class="h2" style="margin-bottom:8px;">Budget Utilisation</div>
+    <div id="budgetNarrative" class="sub" style="margin-bottom:14px;">
       —
     </div>
 
-    <!-- Rail -->
+    <!-- PROGRESS BAR -->
     <div style="
-      position: relative;
-      height: 16px;
-      border-radius: 999px;
+      position:relative;
+      height:16px;
+      border-radius:999px;
+      overflow:hidden;
       background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border-glass);
-      overflow: hidden;
+      border:1px solid var(--border);
+      margin-bottom:10px;
     ">
-
-      <!-- Planned pace -->
-      <div id="budgetPlanned" style="
-        position:absolute;
-        left:0;
-        top:0;
-        height:100%;
+      <!-- Actual -->
+      <div id="budgetActualBar" style="
+        position:absolute; left:0; top:0; height:100%;
         width:0%;
-        background: linear-gradient(90deg,#5aa2ff,#3dd6c6);
-        opacity:0.35;
-        transition: width 1.4s var(--ease-smooth);
+        background: linear-gradient(90deg, var(--amber), #f59e0b);
+        transition: width 1.2s var(--ease);
       "></div>
 
-      <!-- Actual spend -->
-      <div id="budgetActual" style="
-        position:absolute;
-        left:0;
-        top:0;
-        height:100%;
-        width:0%;
-        background: linear-gradient(90deg,#fbbf24,#f59e0b);
-        transition: width 1.4s var(--ease-smooth);
+      <!-- Planned Pace Marker -->
+      <div id="budgetPaceMarker" style="
+        position:absolute; top:-6px; height:28px; width:2px;
+        background:#fff; opacity:.6; left:0%;
+        transition:left 1.2s var(--ease);
       "></div>
-
-      <!-- Today marker -->
-      <div id="todayMarker" style="
-        position:absolute;
-        top:-6px;
-        width:2px;
-        height:28px;
-        background:#fff;
-        opacity:0.6;
-        border-radius:2px;
-        left:0%;
-        transition:left 1.4s var(--ease-smooth);
-      "></div>
-
     </div>
 
-    <!-- Numbers -->
+    <!-- METRICS -->
     <div style="
-      display:flex;
-      justify-content:space-between;
-      margin-top:12px;
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+      gap:14px;
       font-size:13px;
     ">
-      <div class="muted">
-        Planned so far: <span id="plannedVal">—</span>
+      <div>
+        <div class="muted">Budget Used</div>
+        <div id="budgetUsedPct" style="font-weight:700;">—</div>
       </div>
-      <div class="muted">
-        Actual spend: <span id="actualVal">—</span>
+      <div>
+        <div class="muted">Budget Remaining</div>
+        <div id="budgetRemaining" style="font-weight:700;">—</div>
+      </div>
+      <div>
+        <div class="muted">Actual Spend</div>
+        <div id="budgetActualVal" style="font-weight:700;">—</div>
+      </div>
+      <div>
+        <div class="muted">Total Budget</div>
+        <div id="budgetTotalVal" style="font-weight:700;">—</div>
       </div>
     </div>
-
   </div>
+
 </section>
 
 <script>
-/* ================================
-   BUDGET STORY LOGIC
-================================ */
-async function loadBudgetStory(){
+/* =========================================================
+   BUDGET UTILISATION — DATA LOGIC
+========================================================= */
+async function loadBudgetUtilisation(){
   const rows = await fetchSheet("Budget_vs_Actual");
   const now = new Date();
   const currentYM = now.toISOString().slice(0,7);
@@ -548,277 +481,198 @@ async function loadBudgetStory(){
   let totalActual = 0;
 
   rows.forEach(r=>{
-    const m = r.c[0]?.v;
-    const budget = Number(r.c[2]?.v) || 0;
-    const actual = Number(r.c[3]?.v) || 0;
+    const m = r.c[0]?.v;                 // Month (yyyy-mm)
+    const budget = Number(r.c[2]?.v) || 0; // Budget_Amount
+    const actual = Number(r.c[3]?.v) || 0; // Actual_Amount
 
-    if(MODE === "MONTH"){
-      if(m === currentYM){
-        totalBudget += budget;
-        totalActual += actual;
-      }
-    } else {
-      if(m <= currentYM){
-        totalBudget += budget;
-        totalActual += actual;
-      }
+    if(
+      (MODE === "MONTH" && m === currentYM) ||
+      (MODE === "YTD" && m <= currentYM)
+    ){
+      totalBudget += budget;
+      totalActual += actual;
     }
   });
 
-  /* Planned pace */
-  let plannedSoFar;
+  const usedPct = totalBudget > 0 ? (totalActual / totalBudget) : 0;
+  const remaining = Math.max(totalBudget - totalActual, 0);
+
+  // Animate bar
+  document.getElementById("budgetActualBar").style.width =
+    Math.min(usedPct * 100, 100) + "%";
+
+  // Planned pace (time-based)
+  let pacePct = 0;
   if(MODE === "MONTH"){
     const daysInMonth = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-    plannedSoFar = totalBudget * (now.getDate() / daysInMonth);
+    pacePct = (now.getDate() / daysInMonth) * 100;
   } else {
     const start = new Date(now.getFullYear(), 0, 1);
-    const daysPassed = (now - start) / (1000*60*60*24);
-    plannedSoFar = totalBudget * (daysPassed / 365);
+    const daysPassed = Math.max((now - start) / (1000*60*60*24), 1);
+    pacePct = Math.min((daysPassed / 365) * 100, 100);
   }
+  document.getElementById("budgetPaceMarker").style.left = pacePct + "%";
 
-  plannedSoFar = Math.max(plannedSoFar,1);
-  const pctPlanned = Math.min((plannedSoFar / totalBudget) * 100, 100);
-  const pctActual = Math.min((totalActual / totalBudget) * 100, 100);
+  // Numbers
+  document.getElementById("budgetUsedPct").innerText =
+    (usedPct * 100).toFixed(2) + "%";
 
-  document.getElementById("budgetPlanned").style.width = pctPlanned + "%";
-  document.getElementById("budgetActual").style.width = pctActual + "%";
-  document.getElementById("todayMarker").style.left = pctPlanned + "%";
+  document.getElementById("budgetRemaining").innerText =
+    "₹" + remaining.toLocaleString("en-IN");
 
-  document.getElementById("plannedVal").innerText =
-    "₹" + Math.round(plannedSoFar).toLocaleString("en-IN");
+  document.getElementById("budgetActualVal").innerText =
+    "₹" + totalActual.toLocaleString("en-IN");
 
-  document.getElementById("actualVal").innerText =
-    "₹" + Math.round(totalActual).toLocaleString("en-IN");
+  document.getElementById("budgetTotalVal").innerText =
+    "₹" + totalBudget.toLocaleString("en-IN");
 
-  /* Narrative */
+  // Narrative
+  const diff = totalActual - (totalBudget * (pacePct/100));
   const narrative = document.getElementById("budgetNarrative");
-  const diff = totalActual - plannedSoFar;
 
   if(diff > 0){
     narrative.innerText =
-      `You are ahead of budget pace by ₹${Math.round(diff).toLocaleString("en-IN")}. Slow down discretionary spending.`;
+      `You are ahead of budget pace by ₹${Math.round(diff).toLocaleString("en-IN")}. Consider slowing discretionary spends.`;
   } else {
     narrative.innerText =
-      `You are within budget pace. You have ₹${Math.round(Math.abs(diff)).toLocaleString("en-IN")} flexibility right now.`;
+      `You are within budget pace with ₹${Math.round(Math.abs(diff)).toLocaleString("en-IN")} flexibility right now.`;
   }
 }
 
-/* Hook */
-const prevReload2 = reloadAll;
+/* Attach to global reload */
+const _reload5 = reloadAll;
 reloadAll = function(){
-  prevReload2();
-  loadBudgetStory();
+  _reload5();
+  loadBudgetUtilisation();
 };
 
-/* Initial */
-loadBudgetStory();
+/* Initial load */
+loadBudgetUtilisation();
 </script>
 
-  <!-- ================================
-     📊 SPENDING BEHAVIOUR
-================================ -->
-<section class="container fade-in" style="margin-top: 30px;">
+  <!-- =========================================================
+     📅 SPENDING BEHAVIOUR + CATEGORIES
+========================================================= -->
+<section class="container fade">
+
   <div class="glass">
 
-    <div class="h2" style="margin-bottom: 10px;">
-      Spending Behaviour
-    </div>
-
-    <div class="subtle" style="margin-bottom: 18px;">
-      How your expenses are distributed through time
+    <div class="h2" style="margin-bottom:8px;">Spending Behaviour</div>
+    <div class="sub" style="margin-bottom:18px;">
+      How expenses are distributed through time
     </div>
 
     <!-- WEEKLY RHYTHM -->
-    <div style="
-      display: grid;
+    <div id="weeklyGrid" style="
+      display:grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      margin-bottom: 20px;
-    " id="weeklyGrid">
+      gap:10px;
+      margin-bottom:26px;
+    ">
       <!-- injected -->
     </div>
 
-    <!-- MOM COMPARISON -->
-    <div style="
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px,1fr));
-      gap: 14px;
-      font-size: 13px;
+    <hr style="border:none;border-top:1px solid var(--border);margin:18px 0;">
+
+    <div class="h2" style="margin-bottom:8px;">Expense Categories</div>
+    <div class="sub" style="margin-bottom:14px;">
+      Ranked by actual spending impact
+    </div>
+
+    <!-- CATEGORY LIST -->
+    <div id="categoryList" style="
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     ">
-      <div>
-        <div class="muted">This Month</div>
-        <div id="thisMonthSpend" style="font-weight:600;">—</div>
-      </div>
-
-      <div>
-        <div class="muted">Last Month</div>
-        <div id="lastMonthSpend" style="font-weight:600;">—</div>
-      </div>
-
-      <div>
-        <div class="muted">Direction</div>
-        <div id="momDirection" style="font-weight:700;">—</div>
-      </div>
+      <!-- injected -->
     </div>
 
   </div>
+
 </section>
 
 <script>
-/* ================================
-   SPENDING BEHAVIOUR LOGIC
-================================ */
-async function loadSpendingBehaviour(){
-  const rows = await fetchSheet("Txn_Clean");
+/* =========================================================
+   SPENDING BEHAVIOUR + CATEGORY LOGIC
+========================================================= */
+async function loadSpendingAndCategories(){
+
+  const txns = await fetchSheet("Txn_Clean");
+  const catMonth = await fetchSheet("Category_Monthly_Actuals");
+
   const now = new Date();
+  const currentYM = now.toISOString().slice(0,7);
 
-  const ym = now.toISOString().slice(0,7);
-  const lastYM = new Date(now.getFullYear(), now.getMonth()-1, 1)
-                    .toISOString().slice(0,7);
+  /* ---------- WEEKLY RHYTHM (Current Month only) ---------- */
+  const weekly = [0,0,0,0,0,0,0]; // Mon → Sun
 
-  /* Weekly buckets (Mon–Sun) */
-  const weekSpend = [0,0,0,0,0,0,0];
-  let thisMonthTotal = 0;
-  let lastMonthTotal = 0;
+  txns.forEach(r=>{
+    const amt = Number(r.c[9]?.v) || 0;   // Signed_Amount
+    const dateVal = r.c[1]?.v;            // Txn_Date
+    const effMonth = r.c[3]?.v;            // Effective_Month
 
-  rows.forEach(r=>{
-    const amt = Number(r.c[9]?.v) || 0;
-    const m = r.c[3]?.v;
-    const d = new Date(r.c[1]?.v);
+    if(!dateVal || amt >= 0) return;
 
-    if(amt < 0){
-      if(m === ym){
-        thisMonthTotal += Math.abs(amt);
-        const day = (d.getDay()+6)%7; // Mon=0
-        weekSpend[day] += Math.abs(amt);
-      }
-      if(m === lastYM){
-        lastMonthTotal += Math.abs(amt);
-      }
-    }
+    if(MODE === "MONTH" && effMonth !== currentYM) return;
+    if(MODE === "YTD" && effMonth > currentYM) return;
+
+    const d = new Date(dateVal);
+    const day = (d.getDay() + 6) % 7; // Monday = 0
+    weekly[day] += Math.abs(amt);
   });
 
-  /* Weekly grid */
+  const maxDay = Math.max(...weekly, 1);
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   const grid = document.getElementById("weeklyGrid");
   grid.innerHTML = "";
 
-  const max = Math.max(...weekSpend,1);
-  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-
-  weekSpend.forEach((v,i)=>{
-    const intensity = v / max;
+  weekly.forEach((val,i)=>{
+    const intensity = val / maxDay;
     const cell = document.createElement("div");
 
     cell.style.height = "64px";
     cell.style.borderRadius = "14px";
+    cell.style.background =
+      `rgba(251,191,36,${0.15 + intensity * 0.6})`;
     cell.style.display = "flex";
     cell.style.flexDirection = "column";
     cell.style.justifyContent = "center";
     cell.style.alignItems = "center";
     cell.style.fontSize = "12px";
-    cell.style.background =
-      `rgba(251,191,36,${0.15 + intensity*0.6})`;
-    cell.style.transition = "all 0.6s var(--ease-smooth)";
+    cell.style.transition = "0.6s var(--ease)";
 
     cell.innerHTML = `
       <div style="font-weight:600">${days[i]}</div>
-      <div class="muted">₹${Math.round(v)}</div>
+      <div class="muted">₹${Math.round(val)}</div>
     `;
-
     grid.appendChild(cell);
   });
 
-  /* MoM */
-  document.getElementById("thisMonthSpend").innerText =
-    "₹" + Math.round(thisMonthTotal).toLocaleString("en-IN");
+  /* ---------- CATEGORY RANKING ---------- */
+  const categoryTotals = {};
 
-  document.getElementById("lastMonthSpend").innerText =
-    "₹" + Math.round(lastMonthTotal).toLocaleString("en-IN");
-
-  const dir = document.getElementById("momDirection");
-  if(thisMonthTotal > lastMonthTotal){
-    dir.innerText = "↑ Higher spending";
-    dir.style.color = "var(--accent-red)";
-  } else if(thisMonthTotal < lastMonthTotal){
-    dir.innerText = "↓ Improved control";
-    dir.style.color = "var(--accent-teal)";
-  } else {
-    dir.innerText = "→ Same level";
-    dir.style.color = "var(--text-secondary)";
-  }
-}
-
-/* Hook */
-const prevReload3 = reloadAll;
-reloadAll = function(){
-  prevReload3();
-  loadSpendingBehaviour();
-};
-
-/* Initial */
-loadSpendingBehaviour();
-</script>
-
-  <!-- ================================
-     🧾 CATEGORY RANKING
-================================ -->
-<section class="container fade-in" style="margin-top: 30px;">
-  <div class="glass">
-
-    <div class="h2" style="margin-bottom: 6px;">
-      Expense Categories
-    </div>
-
-    <div class="subtle" style="margin-bottom: 18px;">
-      Ranked by actual spending impact
-    </div>
-
-    <div id="categoryList" style="
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    ">
-      <!-- rows injected -->
-    </div>
-
-  </div>
-</section>
-
-<script>
-/* ================================
-   CATEGORY RANKING LOGIC
-================================ */
-async function loadCategoryRanking(){
-  const rows = await fetchSheet("Category_Monthly_Actuals");
-  const now = new Date();
-  const currentYM = now.toISOString().slice(0,7);
-
-  const data = {};
-  rows.forEach(r=>{
+  catMonth.forEach(r=>{
     const m = r.c[0]?.v;
     const cat = r.c[1]?.v;
     const amt = Number(r.c[2]?.v) || 0;
 
     if(!cat) return;
 
-    if(MODE === "MONTH"){
-      if(m === currentYM){
-        data[cat] = (data[cat] || 0) + amt;
-      }
-    } else {
-      if(m <= currentYM){
-        data[cat] = (data[cat] || 0) + amt;
-      }
+    if(
+      (MODE === "MONTH" && m === currentYM) ||
+      (MODE === "YTD" && m <= currentYM)
+    ){
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + amt;
     }
   });
 
-  const sorted = Object.entries(data)
+  const sorted = Object.entries(categoryTotals)
     .sort((a,b)=>b[1]-a[1]);
 
+  const total = sorted.reduce((s,[,v])=>s+v,0) || 1;
   const list = document.getElementById("categoryList");
   list.innerHTML = "";
-
-  const total = sorted.reduce((s,[,v])=>s+v,0) || 1;
 
   sorted.forEach(([cat,amt],i)=>{
     const pct = Math.round((amt/total)*100);
@@ -827,11 +681,10 @@ async function loadCategoryRanking(){
     row.style.display = "grid";
     row.style.gridTemplateColumns = "1fr auto auto";
     row.style.alignItems = "center";
-    row.style.gap = "12px";
     row.style.padding = "10px 14px";
     row.style.borderRadius = "14px";
     row.style.background = "rgba(255,255,255,0.08)";
-    row.style.border = "1px solid var(--border-glass)";
+    row.style.border = "1px solid var(--border)";
 
     row.innerHTML = `
       <div>
@@ -841,124 +694,117 @@ async function loadCategoryRanking(){
       <div style="font-weight:600">
         ₹${Math.round(amt).toLocaleString("en-IN")}
       </div>
-      <div style="font-size:14px;color:var(--text-muted)">
-        #${i+1}
-      </div>
+      <div class="muted">#${i+1}</div>
     `;
 
     list.appendChild(row);
   });
+
 }
 
-/* Hook */
-const prevReload4 = reloadAll;
+/* Attach to reload */
+const _reload6 = reloadAll;
 reloadAll = function(){
-  prevReload4();
-  loadCategoryRanking();
+  _reload6();
+  loadSpendingAndCategories();
 };
 
-/* Initial */
-loadCategoryRanking();
-  </script>
+/* Initial load */
+loadSpendingAndCategories();
+</script>
 
+   
+<!-- =========================================================
+     💳 EMI STRESS METER
+========================================================= -->
+<section class="container fade">
 
-
- <!-- ================================
-     💳 EMI & OBLIGATIONS
-================================ -->
-<section class="container fade-in" style="margin-top: 32px;">
   <div class="glass">
 
-    <div class="h2" style="margin-bottom: 6px;">
-      EMI & Obligations
+    <div class="h2" style="margin-bottom:8px;">EMI Stress</div>
+    <div class="sub" style="margin-bottom:16px;">
+      Ongoing obligations and financial pressure
     </div>
 
-    <div class="subtle" style="margin-bottom: 18px;">
-      Ongoing commitments and financial pressure
-    </div>
-
-    <!-- EMI SUMMARY -->
+    <!-- SUMMARY -->
     <div style="
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
-      gap: 16px;
-      margin-bottom: 18px;
+      grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+      gap:14px;
+      margin-bottom:18px;
     ">
-
       <div>
-        <div class="muted">Monthly EMI Outflow</div>
+        <div class="muted">Monthly EMI</div>
         <div id="emiMonthly" style="font-weight:700;font-size:18px;">—</div>
       </div>
-
       <div>
-        <div class="muted">Remaining EMI Liability</div>
+        <div class="muted">Remaining Liability</div>
         <div id="emiRemaining" style="font-weight:700;font-size:18px;">—</div>
       </div>
-
       <div>
-        <div class="muted">EMI Stress Level</div>
-        <div id="emiStatus" style="font-weight:700;font-size:16px;">—</div>
+        <div class="muted">Pressure Level</div>
+        <div id="emiPressureText" style="font-weight:700;font-size:16px;">—</div>
       </div>
-
     </div>
 
-    <!-- STRESS THERMOMETER -->
+    <!-- STRESS BAR -->
     <div style="
-      position: relative;
-      height: 16px;
-      border-radius: 999px;
+      position:relative;
+      height:16px;
+      border-radius:999px;
+      overflow:hidden;
       background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border-glass);
-      overflow: hidden;
+      border:1px solid var(--border);
     ">
-
       <div id="emiStressBar" style="
         height:100%;
         width:0%;
-        transition: width 1.4s var(--ease-smooth);
-        background: linear-gradient(90deg,
-          #22c55e,
-          #fbbf24,
-          #ef4444
+        background: linear-gradient(
+          90deg,
+          var(--green),
+          var(--amber),
+          var(--red)
         );
+        transition: width 1.2s var(--ease);
       "></div>
-
     </div>
 
-    <div class="muted" style="margin-top:10px;font-size:12px;">
-      Green = manageable · Amber = caution · Red = high pressure
+    <div class="muted" style="margin-top:8px;font-size:12px;">
+      Ideal EMI ≤ 30% of income
     </div>
 
   </div>
+
 </section>
 
 <script>
-/* ================================
-   EMI LOGIC
-================================ */
-async function loadEMIZone(){
-  const master = await fetchSheet("EMI_Master");
-  const paid = await fetchSheet("EMI_Paid_Summary");
+/* =========================================================
+   EMI STRESS — DATA LOGIC
+========================================================= */
+async function loadEMIStress(){
+
+  const emiMaster = await fetchSheet("EMI_Master");
+  const emiPaid = await fetchSheet("EMI_Paid_Summary");
+
+  const paidMap = {};
+  emiPaid.forEach(r=>{
+    const name = r.c[0]?.v;
+    const monthsPaid = Number(r.c[1]?.v) || 0;
+    if(name) paidMap[name] = monthsPaid;
+  });
 
   let monthlyEMI = 0;
   let remaining = 0;
 
-  const paidMap = {};
-  paid.forEach(r=>{
-    const name = r.c[0]?.v;
-    const monthsPaid = Number(r.c[1]?.v) || 0;
-    paidMap[name] = monthsPaid;
-  });
-
-  master.forEach(r=>{
+  emiMaster.forEach(r=>{
     const name = r.c[0]?.v;
     const totalMonths = Number(r.c[1]?.v) || 0;
     const monthlyAmt = Number(r.c[4]?.v) || 0;
 
     if(!name) return;
 
-    const paidMonths = paidMap[name] || 0;
-    const remainingMonths = Math.max(totalMonths - paidMonths, 0);
+    const paid = paidMap[name] || 0;
+    const remainingMonths = Math.max(totalMonths - paid, 0);
 
     if(remainingMonths > 0){
       monthlyEMI += monthlyAmt;
@@ -966,163 +812,166 @@ async function loadEMIZone(){
     }
   });
 
-  document.getElementById("emiMonthly").innerText =
-    "₹" + Math.round(monthlyEMI).toLocaleString("en-IN");
+  // Income from KPI sheet
+  const kpiSheet = MODE === "MONTH"
+    ? "Dashboard_KPIs_Month"
+    : "Dashboard_KPIs_YTD";
 
-  document.getElementById("emiRemaining").innerText =
-    "₹" + Math.round(remaining).toLocaleString("en-IN");
-
-  /* Stress logic */
-  const kpiSheet =
-    MODE === "MONTH"
-      ? "Dashboard_KPIs_Month"
-      : "Dashboard_KPIs_YTD";
-
-  const kpi = await fetchSheet(kpiSheet);
+  const kpis = await fetchSheet(kpiSheet);
   let income = 0;
 
-  kpi.forEach(r=>{
-    if(r.c[0]?.v === "Current Month Income" ||
-       r.c[0]?.v === "YTD Income"){
-      income = Number(r.c[1]?.v) || 0;
+  kpis.forEach(r=>{
+    const k = r.c[0]?.v;
+    const v = Number(r.c[1]?.v) || 0;
+    if(
+      (MODE === "MONTH" && k === "Current Month Income") ||
+      (MODE === "YTD" && k === "YTD Income")
+    ){
+      income = v;
     }
   });
 
   const ratio = income > 0 ? monthlyEMI / income : 0;
-  const bar = document.getElementById("emiStressBar");
-  const status = document.getElementById("emiStatus");
-
   const pct = Math.min(ratio * 100, 100);
-  bar.style.width = pct + "%";
 
+  document.getElementById("emiMonthly").innerText =
+    "₹" + monthlyEMI.toLocaleString("en-IN");
+
+  document.getElementById("emiRemaining").innerText =
+    "₹" + remaining.toLocaleString("en-IN");
+
+  document.getElementById("emiStressBar").style.width = pct + "%";
+
+  const txt = document.getElementById("emiPressureText");
   if(ratio < 0.25){
-    status.innerText = "Low pressure";
-    status.style.color = "var(--accent-teal)";
-  } else if(ratio < 0.45){
-    status.innerText = "Moderate pressure";
-    status.style.color = "var(--accent-amber)";
+    txt.innerText = "Low";
+    txt.style.color = "var(--green)";
+  } else if(ratio < 0.4){
+    txt.innerText = "Moderate";
+    txt.style.color = "var(--amber)";
   } else {
-    status.innerText = "High pressure";
-    status.style.color = "var(--accent-red)";
+    txt.innerText = "High";
+    txt.style.color = "var(--red)";
   }
 }
 
-/* Hook */
-const prevReload5 = reloadAll;
+/* Attach to reload */
+const _reload7 = reloadAll;
 reloadAll = function(){
-  prevReload5();
-  loadEMIZone();
+  _reload7();
+  loadEMIStress();
 };
 
-/* Initial */
-loadEMIZone();
+/* Initial load */
+loadEMIStress();
 </script>
 
-
-  <!-- ================================
+   <!-- =========================================================
      ⏳ CASH RUNWAY & TRANSFERS
-================================ -->
-<section class="container fade-in" style="margin-top: 34px;">
+========================================================= -->
+<section class="container fade">
+
   <div class="glass">
 
-    <div class="h2" style="margin-bottom: 6px;">
-      Cash Runway
+    <div class="h2" style="margin-bottom:8px;">Cash Runway</div>
+    <div class="sub" style="margin-bottom:16px;">
+      How long your cash can sustain current spending
     </div>
 
-    <div class="subtle" style="margin-bottom: 18px;">
-      How long your current cash can sustain daily expenses
-    </div>
-
-    <!-- RUNWAY SUMMARY -->
+    <!-- SUMMARY -->
     <div style="
       display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
-      gap:16px;
+      grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+      gap:14px;
       margin-bottom:18px;
     ">
       <div>
-        <div class="muted">Available Cash</div>
-        <div id="cashAvailable" style="font-size:20px;font-weight:700;">—</div>
+        <div class="muted">Cash Available</div>
+        <div id="cashAvailable" style="font-weight:700;font-size:18px;">—</div>
       </div>
-
       <div>
         <div class="muted">Daily Burn (15-day avg)</div>
-        <div id="dailyBurn" style="font-size:20px;font-weight:700;">—</div>
+        <div id="dailyBurn" style="font-weight:700;font-size:18px;">—</div>
       </div>
-
       <div>
         <div class="muted">Runway</div>
-        <div id="runwayDays" style="font-size:20px;font-weight:700;">—</div>
+        <div id="runwayDays" style="font-weight:700;font-size:18px;">—</div>
       </div>
-
       <div>
         <div class="muted">Status</div>
-        <div id="runwayStatus" style="font-size:16px;font-weight:700;">—</div>
+        <div id="runwayStatus" style="font-weight:700;font-size:16px;">—</div>
       </div>
     </div>
 
     <!-- RUNWAY BAR -->
     <div style="
-      position: relative;
-      height: 14px;
-      border-radius: 999px;
+      position:relative;
+      height:16px;
+      border-radius:999px;
+      overflow:hidden;
       background: rgba(255,255,255,0.08);
-      border: 1px solid var(--border-glass);
-      overflow: hidden;
-      margin-bottom:14px;
+      border:1px solid var(--border);
+      margin-bottom:12px;
     ">
       <div id="runwayBar" style="
         height:100%;
         width:0%;
-        transition: width 1.4s var(--ease-smooth);
-        background: linear-gradient(90deg,#22c55e,#fbbf24,#ef4444);
+        background: linear-gradient(
+          90deg,
+          var(--green),
+          var(--amber),
+          var(--red)
+        );
+        transition: width 1.2s var(--ease);
       "></div>
     </div>
 
-    <!-- SMART TRANSFER -->
-    <div id="transferSuggestion" style="
-      margin-top:10px;
-      font-size:13px;
-      color: var(--text-secondary);
-    ">
+    <!-- SMART SUGGESTION -->
+    <div id="transferSuggestion" class="sub">
       —
     </div>
 
   </div>
+
 </section>
 
 <script>
-/* ================================
-   CASH RUNWAY LOGIC
-================================ */
+/* =========================================================
+   CASH RUNWAY — DATA LOGIC
+========================================================= */
 async function loadCashRunway(){
+
   const balances = await fetchSheet("Account_Balances_Live");
   const txns = await fetchSheet("Txn_Clean");
 
   let cash = 0;
-  let expense15d = 0;
+  let expense15 = 0;
 
-  /* Cash in hand */
+  // Cash balance
   balances.forEach(r=>{
     if(r.c[0]?.v === "Cash"){
       cash = Number(r.c[4]?.v) || 0;
     }
   });
 
-  /* Last 15 days expenses */
+  // Last 15 days expenses
   const now = new Date();
-  const cutoff = new Date(now);
+  const cutoff = new Date();
   cutoff.setDate(now.getDate() - 15);
 
   txns.forEach(r=>{
     const amt = Number(r.c[9]?.v) || 0;
-    const date = new Date(r.c[1]?.v);
-    if(amt < 0 && date >= cutoff){
-      expense15d += Math.abs(amt);
+    const dateVal = r.c[1]?.v;
+
+    if(amt < 0 && dateVal){
+      const d = new Date(dateVal);
+      if(d >= cutoff){
+        expense15 += Math.abs(amt);
+      }
     }
   });
 
-  const daily = expense15d / 15 || 1;
+  const daily = expense15 / 15 || 1;
   const runway = cash / daily;
 
   document.getElementById("cashAvailable").innerText =
@@ -1134,7 +983,7 @@ async function loadCashRunway(){
   document.getElementById("runwayDays").innerText =
     Math.floor(runway) + " days";
 
-  /* Status */
+  // Status & bar
   const bar = document.getElementById("runwayBar");
   const status = document.getElementById("runwayStatus");
 
@@ -1143,431 +992,333 @@ async function loadCashRunway(){
 
   if(runway > 30){
     status.innerText = "Safe";
-    status.style.color = "var(--accent-teal)";
+    status.style.color = "var(--green)";
   } else if(runway > 14){
     status.innerText = "Caution";
-    status.style.color = "var(--accent-amber)";
+    status.style.color = "var(--amber)";
   } else {
     status.innerText = "Critical";
-    status.style.color = "var(--accent-red)";
+    status.style.color = "var(--red)";
   }
 
-  /* Smart transfer */
+  // Smart transfer logic
   let donor = null;
   balances.forEach(r=>{
-    const name = r.c[0]?.v;
+    const acc = r.c[0]?.v;
     const bal = Number(r.c[4]?.v) || 0;
-    if(name !== "Cash" && bal > 5000){
-      donor = name;
+    if(acc !== "Cash" && bal > 5000 && !donor){
+      donor = acc;
     }
   });
 
   const msg = document.getElementById("transferSuggestion");
   if(runway < 14 && donor){
     msg.innerText =
-      `🧠 Consider transferring funds from ${donor} to Cash to extend your runway.`;
+      `🧠 Suggested action: transfer funds from ${donor} to Cash to extend your runway.`;
   } else {
     msg.innerText =
-      "Cash position is currently stable. No immediate action needed.";
+      "Cash position is stable. No immediate transfer needed.";
   }
 }
 
-/* Hook */
-const prevReload6 = reloadAll;
+/* Attach to reload */
+const _reload8 = reloadAll;
 reloadAll = function(){
-  prevReload6();
+  _reload8();
   loadCashRunway();
 };
 
-/* Initial */
+/* Initial load */
 loadCashRunway();
-    </script>
+</script>
 
-<!-- ================================
+  <!-- =========================================================
      🧠 AI INSIGHTS
-================================ -->
-<section class="container fade-in" style="margin-top: 36px;">
+========================================================= -->
+<section class="container fade">
+
   <div class="glass">
 
-    <div class="h2" style="margin-bottom: 6px;">
-      Insights
+    <div class="h2" style="margin-bottom:8px;">AI Insights</div>
+    <div class="sub" style="margin-bottom:14px;">
+      What your money is trying to tell you
     </div>
 
-    <div class="subtle" style="margin-bottom: 18px;">
-      What deserves your attention right now
-    </div>
-
-    <div id="insightsList" style="
+    <div id="aiInsights" style="
       display:flex;
       flex-direction:column;
       gap:12px;
     ">
-      <!-- insights injected -->
+      <!-- injected -->
     </div>
 
   </div>
+
 </section>
 
 <script>
-/* ================================
-   AI INSIGHTS ENGINE
-================================ */
+/* =========================================================
+   AI INSIGHTS — INTELLIGENCE LAYER
+========================================================= */
 async function loadAIInsights(){
+
   const insights = [];
 
-  /* ---------- DATA SOURCES ---------- */
-  const kpiSheet =
-    MODE === "MONTH"
-      ? "Dashboard_KPIs_Month"
-      : "Dashboard_KPIs_YTD";
+  /* ---------- Budget Overspend ---------- */
+  const bva = await fetchSheet("Budget_vs_Actual");
+  const now = new Date();
+  const currentYM = now.toISOString().slice(0,7);
 
-  const kpis = await fetchSheet(kpiSheet);
-  const balances = await fetchSheet("Account_Balances_Live");
-  const budget = await fetchSheet("Budget_vs_Actual");
+  let overspentCats = [];
 
-  let k = {};
-  kpis.forEach(r=>{
-    if(r.c[0]?.v) k[r.c[0].v] = Number(r.c[1]?.v) || 0;
-  });
-
-  /* ---------- 1. OVESPEND ALERT ---------- */
-  let budgetUsed = 0;
-  let budgetTotal = 0;
-
-  const nowYM = new Date().toISOString().slice(0,7);
-
-  budget.forEach(r=>{
+  bva.forEach(r=>{
     const m = r.c[0]?.v;
+    const cat = r.c[1]?.v;
+    const budget = Number(r.c[2]?.v) || 0;
+    const actual = Number(r.c[3]?.v) || 0;
+
     if(
-      (MODE === "MONTH" && m === nowYM) ||
-      (MODE === "YTD" && m <= nowYM)
+      ((MODE === "MONTH" && m === currentYM) ||
+       (MODE === "YTD" && m <= currentYM)) &&
+      actual > budget && budget > 0
     ){
-      budgetTotal += Number(r.c[2]?.v) || 0;
-      budgetUsed += Number(r.c[3]?.v) || 0;
+      overspentCats.push({cat, over: actual - budget});
     }
   });
 
-  const burnPct = budgetTotal > 0 ? budgetUsed / budgetTotal : 0;
-
-  if(burnPct > 0.9){
-    insights.push({
-      type:"Overspend",
-      severity:"HIGH",
-      title:"Budget burn is high",
-      msg:`You have used ${Math.round(burnPct*100)}% of your budget.`,
-      action:"Pause discretionary categories for a few days.",
-      confidence:0.95
-    });
-  } else if(burnPct > 0.75){
-    insights.push({
-      type:"Overspend",
-      severity:"MEDIUM",
-      title:"Budget pace needs attention",
-      msg:`You are at ${Math.round(burnPct*100)}% budget usage.`,
-      action:"Track food, travel and shopping closely.",
-      confidence:0.85
+  if(overspentCats.length){
+    overspentCats.slice(0,2).forEach(o=>{
+      insights.push({
+        icon:"🚨",
+        title:"Overspend Alert",
+        msg:`${o.cat} exceeded budget by ₹${Math.round(o.over).toLocaleString("en-IN")}.`
+      });
     });
   }
 
-  /* ---------- 2. CASH RUNWAY ALERT ---------- */
+  /* ---------- Cash Runway Risk ---------- */
+  const balances = await fetchSheet("Account_Balances_Live");
   let cash = 0;
   balances.forEach(r=>{
-    if(r.c[0]?.v === "Cash"){
-      cash = Number(r.c[4]?.v) || 0;
+    if(r.c[0]?.v === "Cash") cash = Number(r.c[4]?.v)||0;
+  });
+
+  if(cash < 5000){
+    insights.push({
+      icon:"📉",
+      title:"Low Cash Cushion",
+      msg:"Cash balance is thin. Consider consolidating funds from other accounts."
+    });
+  }
+
+  /* ---------- EMI Stress ---------- */
+  const emiMaster = await fetchSheet("EMI_Master");
+  const emiPaid = await fetchSheet("EMI_Paid_Summary");
+  const paidMap = {};
+  emiPaid.forEach(r=>{
+    paidMap[r.c[0]?.v] = Number(r.c[1]?.v)||0;
+  });
+
+  let activeEMI = 0;
+  emiMaster.forEach(r=>{
+    const name = r.c[0]?.v;
+    const total = Number(r.c[1]?.v)||0;
+    const monthly = Number(r.c[4]?.v)||0;
+    const paid = paidMap[name]||0;
+    if(total-paid>0) activeEMI += monthly;
+  });
+
+  if(activeEMI > 15000){
+    insights.push({
+      icon:"💳",
+      title:"High EMI Load",
+      msg:"EMIs consume a large part of monthly cash flow. Avoid new liabilities."
+    });
+  }
+
+  /* ---------- Positive Signal ---------- */
+  const kpis = await fetchSheet(
+    MODE==="MONTH" ? "Dashboard_KPIs_Month" : "Dashboard_KPIs_YTD"
+  );
+
+  let net = 0;
+  kpis.forEach(r=>{
+    if(
+      (MODE==="MONTH" && r.c[0]?.v==="Current Month Net Savings") ||
+      (MODE==="YTD" && r.c[0]?.v==="YTD Net Savings")
+    ){
+      net = Number(r.c[1]?.v)||0;
     }
   });
 
-  const dailyBurn =
-    MODE === "MONTH"
-      ? k["Current Month Expenses"] / new Date().getDate()
-      : k["YTD Expenses"] / (new Date().getMonth()*30+1);
-
-  const runway = cash / (dailyBurn || 1);
-
-  if(runway < 10){
+  if(net > 0){
     insights.push({
-      type:"Cash",
-      severity:"HIGH",
-      title:"Cash runway is critical",
-      msg:`Cash may last only ${Math.floor(runway)} days at current spend.`,
-      action:"Move funds into Cash or reduce daily expenses.",
-      confidence:0.9
-    });
-  } else if(runway < 20){
-    insights.push({
-      type:"Cash",
-      severity:"MEDIUM",
-      title:"Cash runway is tightening",
-      msg:`Estimated runway is ${Math.floor(runway)} days.`,
-      action:"Avoid non-essential spends this week.",
-      confidence:0.75
+      icon:"💡",
+      title:"Healthy Momentum",
+      msg:"You are saving money. This is a good phase to build reserves or invest."
     });
   }
 
-  /* ---------- 3. EMI PRESSURE ---------- */
-  const emiMonthly = k["EMI Paid (Current Month)"] || 0;
-  const income =
-    MODE === "MONTH"
-      ? k["Current Month Income"]
-      : k["YTD Income"];
+  /* ---------- Render ---------- */
+  const box = document.getElementById("aiInsights");
+  box.innerHTML = "";
 
-  if(income > 0 && emiMonthly / income > 0.4){
-    insights.push({
-      type:"EMI",
-      severity:"HIGH",
-      title:"EMI pressure is heavy",
-      msg:"EMIs consume a large portion of income.",
-      action:"Avoid new obligations and build buffer.",
-      confidence:0.88
-    });
-  }
-
-  /* ---------- 4. POSITIVE INSIGHT ---------- */
-  const savings =
-    MODE === "MONTH"
-      ? k["Current Month Net Savings"]
-      : k["YTD Net Savings"];
-
-  if(savings > 0 && burnPct < 0.7){
-    insights.push({
-      type:"Opportunity",
-      severity:"LOW",
-      title:"You are in a healthy zone",
-      msg:"Savings and budget are well balanced.",
-      action:"Consider investing surplus safely.",
-      confidence:0.8
-    });
-  }
-
-  /* ---------- RENDER ---------- */
-  const list = document.getElementById("insightsList");
-  list.innerHTML = "";
-
-  if(insights.length === 0){
-    list.innerHTML = `
-      <div class="subtle">
-        No critical insights right now. Keep going 👍
-      </div>`;
+  if(!insights.length){
+    box.innerHTML = `
+      <div class="muted">
+        No critical signals detected. Your finances look stable.
+      </div>
+    `;
     return;
   }
 
-  insights
-    .sort((a,b)=>b.confidence - a.confidence)
-    .forEach(i=>{
-      const card = document.createElement("div");
-
-      let color =
-        i.severity === "HIGH"
-          ? "var(--accent-red)"
-          : i.severity === "MEDIUM"
-          ? "var(--accent-amber)"
-          : "var(--accent-teal)";
-
-      card.style.padding = "14px 16px";
-      card.style.borderRadius = "16px";
-      card.style.background = "rgba(255,255,255,0.08)";
-      card.style.border = `1px solid ${color}`;
-      card.style.display = "grid";
-      card.style.gap = "6px";
-
-      card.innerHTML = `
-        <div style="font-weight:700;color:${color}">
-          ${i.title}
-        </div>
-        <div class="subtle">${i.msg}</div>
-        <div style="font-size:13px;">
-          👉 ${i.action}
-        </div>
-        <div class="muted" style="font-size:11px;">
-          Confidence: ${Math.round(i.confidence*100)}%
-        </div>
-      `;
-
-      list.appendChild(card);
-    });
+  insights.forEach(i=>{
+    const card = document.createElement("div");
+    card.style.padding = "12px 14px";
+    card.style.borderRadius = "14px";
+    card.style.background = "rgba(255,255,255,0.08)";
+    card.style.border = "1px solid var(--border)";
+    card.innerHTML = `
+      <div style="font-weight:600">
+        ${i.icon} ${i.title}
+      </div>
+      <div class="muted" style="margin-top:4px;">
+        ${i.msg}
+      </div>
+    `;
+    box.appendChild(card);
+  });
 }
 
-/* Hook */
-const prevReload7 = reloadAll;
+/* Attach to reload */
+const _reload9 = reloadAll;
 reloadAll = function(){
-  prevReload7();
+  _reload9();
   loadAIInsights();
 };
 
-/* Initial */
+/* Initial load */
 loadAIInsights();
 </script>
 
- <!-- ================================
-     🎯 ACTIONS & SYSTEM POLISH
-================================ -->
-<section class="container fade-in" style="margin-top: 38px; margin-bottom: 60px;">
+   <!-- =========================================================
+     🏦 ACCOUNT BALANCES
+========================================================= -->
+<section class="container fade">
+
   <div class="glass">
 
-    <div class="h2" style="margin-bottom: 6px;">
-      Suggested Actions
+    <div class="h2" style="margin-bottom:8px;">Account Balances</div>
+    <div class="sub" style="margin-bottom:14px;">
+      Live balances across your money buckets
     </div>
 
-    <div class="subtle" style="margin-bottom: 18px;">
-      Small actions that improve financial stability
-    </div>
-
-    <div id="actionsList" style="
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    ">
-      <!-- actions injected -->
+    <div style="overflow-x:auto;">
+      <table style="
+        width:100%;
+        border-collapse:separate;
+        border-spacing:0 8px;
+        font-size:13px;
+      ">
+        <thead>
+          <tr class="muted" style="text-align:left;">
+            <th>Account</th>
+            <th>Opening</th>
+            <th>Inflows</th>
+            <th>Outflows</th>
+            <th>Live Balance</th>
+          </tr>
+        </thead>
+        <tbody id="accountTable">
+          <!-- injected -->
+        </tbody>
+      </table>
     </div>
 
   </div>
+
 </section>
 
-<!-- ================================
-     📱 PWA INSTALL PROMPT
-================================ -->
-<div id="pwaPrompt" style="
-  position: fixed;
-  bottom: 18px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: var(--blur-light);
-  border: 1px solid var(--border-glass);
-  padding: 14px 18px;
-  border-radius: 18px;
-  display: none;
-  gap: 12px;
-  align-items: center;
-  z-index: 999;
-">
-  <div class="subtle">
-    Install this dashboard for quick access
-  </div>
-  <button class="btn" onclick="installPWA()">Install</button>
-</div>
-
 <script>
-/* ================================
-   ACTIONS ENGINE
-================================ */
-async function loadActions(){
-  const actions = [];
+/* =========================================================
+   ACCOUNT BALANCES — DATA LOGIC
+========================================================= */
+async function loadAccountBalances(){
 
-  const kpiSheet =
-    MODE === "MONTH"
-      ? "Dashboard_KPIs_Month"
-      : "Dashboard_KPIs_YTD";
+  const rows = await fetchSheet("Account_Balances_Live");
+  const tbody = document.getElementById("accountTable");
+  tbody.innerHTML = "";
 
-  const kpis = await fetchSheet(kpiSheet);
-  const balances = await fetchSheet("Account_Balances_Live");
-
-  let k = {};
-  kpis.forEach(r=>{
-    if(r.c[0]?.v) k[r.c[0].v] = Number(r.c[1]?.v) || 0;
-  });
-
-  /* Low balance actions */
-  balances.forEach(r=>{
+  rows.forEach(r=>{
     const acc = r.c[0]?.v;
-    const bal = Number(r.c[4]?.v) || 0;
-    const safe = Number(r.c[5]?.v) || 0;
+    const opening = Number(r.c[1]?.v)||0;
+    const inflow = Number(r.c[2]?.v)||0;
+    const outflow = Number(r.c[3]?.v)||0;
+    const bal = Number(r.c[4]?.v)||0;
 
-    if(acc && safe && bal < safe){
-      actions.push(
-        `Top up <b>${acc}</b> to maintain safe balance`
-      );
-    }
-  });
+    if(!acc) return;
 
-  /* Savings action */
-  const savings =
-    MODE === "MONTH"
-      ? k["Current Month Net Savings"]
-      : k["YTD Net Savings"];
+    const tr = document.createElement("tr");
+    tr.style.background = "rgba(255,255,255,0.06)";
+    tr.style.borderRadius = "12px";
 
-  if(savings > 3000){
-    actions.push(
-      "Consider parking surplus into short-term investment"
-    );
-  }
+    const risk =
+      bal < 0 ? "var(--red)" :
+      bal < 1500 ? "var(--amber)" :
+      "var(--green)";
 
-  /* Budget action */
-  if(k["Budget Used %"] > 0.85){
-    actions.push(
-      "Avoid discretionary categories for the rest of the period"
-    );
-  }
-
-  /* Render */
-  const list = document.getElementById("actionsList");
-  list.innerHTML = "";
-
-  if(actions.length === 0){
-    list.innerHTML = `
-      <div class="subtle">
-        No immediate actions required. You’re in control 👍
-      </div>`;
-    return;
-  }
-
-  actions.forEach(a=>{
-    const row = document.createElement("div");
-    row.style.padding = "12px 16px";
-    row.style.borderRadius = "14px";
-    row.style.background = "rgba(255,255,255,0.08)";
-    row.style.border = "1px solid var(--border-glass)";
-    row.innerHTML = "👉 " + a;
-    list.appendChild(row);
+    tr.innerHTML = `
+      <td style="padding:10px 12px;font-weight:600;">${acc}</td>
+      <td>₹${opening.toLocaleString("en-IN")}</td>
+      <td>₹${inflow.toLocaleString("en-IN")}</td>
+      <td>₹${outflow.toLocaleString("en-IN")}</td>
+      <td style="font-weight:700;color:${risk}">
+        ₹${bal.toLocaleString("en-IN")}
+      </td>
+    `;
+    tbody.appendChild(tr);
   });
 }
 
-/* ================================
-   PWA INSTALL SUPPORT
-================================ */
-let deferredPrompt = null;
-
-window.addEventListener("beforeinstallprompt", (e)=>{
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById("pwaPrompt").style.display = "flex";
-});
-
-function installPWA(){
-  if(!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.finally(()=>{
-    deferredPrompt = null;
-    document.getElementById("pwaPrompt").style.display = "none";
-  });
-}
-
-/* ================================
-   SAFETY GUARDS
-================================ */
-async function fetchSheetSafe(name){
-  try{
-    return await fetchSheet(name);
-  }catch{
-    console.warn("Sheet missing:", name);
-    return [];
-  }
-}
-
-/* ================================
-   FINAL HOOK
-================================ */
-const prevReloadFinal = reloadAll;
+/* =========================================================
+   FINAL GLOBAL RELOAD SAFETY
+========================================================= */
+const _reloadFinal = reloadAll;
 reloadAll = function(){
-  prevReloadFinal();
-  loadActions();
+  _reloadFinal();
+  loadAccountBalances();
 };
 
 /* Initial */
-loadActions();
-      </script>
+loadAccountBalances();
+</script>
 
-  
+<!-- =========================================================
+     📱 OPTIONAL PWA INSTALL HINT
+========================================================= -->
+<div id="pwaHint" style="
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  padding:10px 14px;
+  border-radius:14px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(14px);
+  border:1px solid var(--border);
+  font-size:12px;
+  display:none;
+">
+  📲 Add this dashboard to your Home Screen
+</div>
 
+<script>
+/* Show PWA hint once */
+if(!localStorage.getItem("pwaShown")){
+  setTimeout(()=>{
+    document.getElementById("pwaHint").style.display = "block";
+    localStorage.setItem("pwaShown","yes");
+  },4000);
+}
+</script>
 </body>
 </html>
