@@ -5,14 +5,16 @@
 <title>Kaiwalya’s Finance Dashboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
 :root{
-  --bg:#f8f5f0;          /* Ivory background */
-  --card:#fffdf9;        /* Soft ivory card */
+  --bg:#f8f5f0;
+  --card:#fffdf9;
   --border:#e7e2d9;
   --text:#2f2f2f;
   --muted:#7a746b;
-  --accent:#8b7d6b;      /* Finance neutral */
+  --accent:#8b7d6b;
 }
 
 *{box-sizing:border-box}
@@ -24,38 +26,41 @@ body{
   color:var(--text);
 }
 
-/* Fixed top bar */
-.top-bar{
+/* HEADER */
+.header{
   position:fixed;
-  top:0;
-  left:0;
-  right:0;
-  height:52px;
+  top:0; left:0; right:0;
   background:var(--card);
   border-bottom:1px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 16px;
+  padding:12px 16px;
   z-index:1000;
 }
 
-.title{
-  font-size:16px;
-  font-weight:600;
+.header-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.date{
+.title{font-size:17px;font-weight:600}
+.date{font-size:13px;color:var(--muted)}
+.subtitle{font-size:12px;color:var(--muted);margin-top:4px}
+
+/* CONTENT */
+.container{padding:110px 14px 30px}
+
+/* THOUGHT */
+.thought{
+  background:var(--card);
+  border:1px dashed var(--border);
+  border-radius:12px;
+  padding:12px;
   font-size:13px;
   color:var(--muted);
+  margin-bottom:16px;
 }
 
-/* Page content */
-.container{
-  padding:76px 14px 28px;
-}
-
-/* KPI grid */
+/* KPI */
 .kpi-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -72,26 +77,17 @@ body{
 .kpi h3{
   margin:0;
   font-size:12px;
-  font-weight:500;
   color:var(--muted);
 }
 
 .kpi p{
-  margin:6px 0 0;
-  font-size:22px;
+  margin-top:6px;
+  font-size:20px;
   font-weight:600;
-  letter-spacing:0.2px;
 }
 
-.kpi.accent{
-  border-color:var(--accent);
-}
-
-/* Budget bar */
-.budget-wrap{
-  margin-top:18px;
-}
-
+/* BUDGET BAR */
+.budget{margin-top:16px}
 .budget-labels{
   display:flex;
   justify-content:space-between;
@@ -99,122 +95,185 @@ body{
   color:var(--muted);
   margin-bottom:6px;
 }
-
-.budget-bar-bg{
+.bar-bg{
   height:10px;
   background:#e7e2d9;
   border-radius:999px;
   overflow:hidden;
 }
-
-.budget-bar-used{
+.bar-used{
   height:100%;
-  width:0%;
   background:var(--accent);
-  border-radius:999px;
+  width:0%;
 }
 
-/* Responsive */
-@media(min-width:640px){
-  .kpi-grid{
-    grid-template-columns:repeat(3,1fr);
-  }
+/* ACCOUNTS */
+.section-title{
+  margin-top:22px;
+  margin-bottom:8px;
+  font-size:14px;
+  font-weight:600;
+}
+
+.account-list{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+
+.account-row{
+  display:flex;
+  justify-content:space-between;
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+
+.account-row:last-child{border-bottom:none}
+.account-name{color:var(--muted)}
+.account-amt{font-weight:600}
+
+/* CHART */
+.chart-card{
+  margin-top:22px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
 }
 </style>
 </head>
+
 <body>
 
-<!-- Top fixed bar -->
-<div class="top-bar">
-  <div class="title">Kaiwalya’s Finance Dashboard</div>
-  <div class="date" id="todayDate">–</div>
+<div class="header">
+  <div class="header-top">
+    <div class="title">Kaiwalya’s Finance Dashboard</div>
+    <div class="date" id="todayDate">–</div>
+  </div>
+  <div class="subtitle">“Calm tracking leads to better decisions.”</div>
 </div>
 
-<!-- Main content -->
 <div class="container">
 
-  <!-- KPI Cards -->
+  <div class="thought" id="thought">Loading today’s thought…</div>
+
+  <!-- KPI -->
   <div class="kpi-grid">
     <div class="kpi">
-      <h3>Available Balance</h3>
-      <p id="kBalance">₹–</p>
+      <h3>Total Balance</h3>
+      <p id="kBalance">–</p>
     </div>
-
     <div class="kpi">
-      <h3>Total Expense</h3>
-      <p id="kExpense">₹–</p>
+      <h3>Total Expenses</h3>
+      <p id="kExpense">–</p>
     </div>
-
-    <div class="kpi accent">
+    <div class="kpi">
+      <h3>Budget Remaining</h3>
+      <p id="kRemain">–</p>
+    </div>
+    <div class="kpi">
       <h3>Budget Burn %</h3>
       <p id="kBurn">–%</p>
     </div>
   </div>
 
-  <!-- Budget Remaining Bar -->
-  <div class="budget-wrap">
+  <!-- Budget -->
+  <div class="budget">
     <div class="budget-labels">
-      <span id="budgetUsedLabel">Used: –%</span>
-      <span id="budgetRemainLabel">Remaining: –%</span>
+      <span id="usedLabel">Used: –%</span>
+      <span id="remainLabel">Remaining: –%</span>
     </div>
-    <div class="budget-bar-bg">
-      <div class="budget-bar-used" id="budgetUsedBar"></div>
+    <div class="bar-bg">
+      <div class="bar-used" id="budgetBar"></div>
     </div>
+  </div>
+
+  <!-- Accounts -->
+  <div class="section-title">Account Balances</div>
+  <div class="account-list" id="accounts"></div>
+
+  <!-- Trend -->
+  <div class="chart-card">
+    <canvas id="trendChart" height="140"></canvas>
   </div>
 
 </div>
 
 <script>
-/* Today's Date */
-const d = new Date();
-todayDate.innerText = d.toLocaleDateString("en-IN", {
-  day:"2-digit",
-  month:"short",
-  year:"numeric"
-});
+/* DATE */
+todayDate.innerText = new Date().toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"});
 
-/* Google Sheet Config */
-const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
-const KPI_SHEET = "Dashboard_KPIs";
+/* THOUGHT */
+fetch("https://api.quotable.io/random?tags=wisdom")
+  .then(r=>r.json())
+  .then(q=>thought.innerText=q.content);
+
+/* SHEET CONFIG */
+const SHEET_ID="1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
 
 function fetchSheet(sheet){
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}`;
-  return fetch(url)
-    .then(res => res.text())
-    .then(text => JSON.parse(text.substring(47).slice(0,-2)));
+  const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${sheet}`;
+  return fetch(url).then(r=>r.text())
+    .then(t=>JSON.parse(t.substring(47).slice(0,-2)));
 }
 
-/* Load KPIs */
-async function loadKPIs(){
-  const data = await fetchSheet(KPI_SHEET);
-  const rows = data.table.rows;
-
-  let balance = 0;
-  let expense = 0;
-  let burnPct = 0;
-
-  rows.forEach(r=>{
-    const k = r.c[0]?.v;
-    const v = r.c[1]?.v;
-
-    if(k==="Total Balance (All Accounts)") balance = v;
-    if(k==="Current Month Expenses") expense = v;
-    if(k==="Budget Used %") burnPct = v;
+/* LOAD KPIs */
+fetchSheet("Dashboard_KPIs").then(d=>{
+  let balance=0, expense=0, burn=0;
+  d.table.rows.forEach(r=>{
+    const k=r.c[0]?.v, v=r.c[1]?.v;
+    if(k==="Total Balance (All Accounts)") balance=v;
+    if(k==="Current Month Expenses") expense=v;
+    if(k==="Budget Used %") burn=v;
   });
 
-  const used = Math.round(burnPct * 100);
-  const remaining = 100 - used;
+  const used=Math.round(burn*100);
+  const rem=100-used;
 
-  kBalance.innerText = "₹" + balance.toLocaleString("en-IN");
-  kExpense.innerText = "₹" + expense.toLocaleString("en-IN");
-  kBurn.innerText = used + "%";
+  kBalance.innerText="₹"+balance.toLocaleString("en-IN");
+  kExpense.innerText="₹"+expense.toLocaleString("en-IN");
+  kBurn.innerText=used+"%";
+  kRemain.innerText="₹"+(balance-expense).toLocaleString("en-IN");
 
-  budgetUsedBar.style.width = used + "%";
-  budgetUsedLabel.innerText = "Used: " + used + "%";
-  budgetRemainLabel.innerText = "Remaining: " + remaining + "%";
-}
+  budgetBar.style.width=used+"%";
+  usedLabel.innerText="Used: "+used+"%";
+  remainLabel.innerText="Remaining: "+rem+"%";
+});
 
-loadKPIs();
+/* LOAD ACCOUNTS */
+fetchSheet("Account_Balances_Live").then(d=>{
+  const el=document.getElementById("accounts");
+  d.table.rows.forEach(r=>{
+    const name=r.c[0]?.v;
+    const bal=r.c[4]?.v;
+    if(!name) return;
+    el.innerHTML+=`
+      <div class="account-row">
+        <div class="account-name">${name}</div>
+        <div class="account-amt">₹${bal.toLocaleString("en-IN")}</div>
+      </div>`;
+  });
+});
+
+/* TREND (placeholder – can wire later) */
+new Chart(trendChart,{
+  type:"line",
+  data:{
+    labels:["W1","W2","W3","W4"],
+    datasets:[{
+      data:[3200,2800,4100,2347],
+      borderColor:"#8b7d6b",
+      tension:.4,
+      pointRadius:4
+    }]
+  },
+  options:{
+    plugins:{legend:{display:false}},
+    scales:{x:{grid:{display:false}},y:{grid:{display:false}}}
+  }
+});
 </script>
 
 </body>
