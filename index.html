@@ -11,11 +11,9 @@
   --card: #ffffff;
   --text: #1c1c1e;
   --muted: #6e6e73;
-
   --good: #34c759;
   --warn: #ff9f0a;
   --alert: #ff453a;
-
   --radius: 14px;
   --shadow: 0 6px 20px rgba(0,0,0,0.06);
 }
@@ -56,17 +54,6 @@ body {
   padding: 8px 14px;
   border-radius: 999px;
   box-shadow: var(--shadow);
-}
-
-/* THOUGHT */
-.thought {
-  background: var(--card);
-  padding: 16px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  margin-bottom: 24px;
-  font-style: italic;
-  color: var(--muted);
 }
 
 /* KPI GRID */
@@ -111,17 +98,12 @@ body {
   margin-top: 24px;
 }
 
-.form-card h3 {
-  margin-top: 0;
-}
-
 input, select, button {
   width: 100%;
   padding: 10px;
   margin-top: 10px;
   border-radius: 10px;
   border: 1px solid #ddd;
-  font-size: 14px;
 }
 
 button {
@@ -130,25 +112,15 @@ button {
   border: none;
   cursor: pointer;
 }
-
-button:hover {
-  opacity: 0.9;
-}
 </style>
 </head>
 
   <body>
 <div class="app">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="date" id="todayDate">—</div>
     <div class="streak">🔥 <span id="streakCount">1</span>-day streak</div>
-  </div>
-
-  <!-- THOUGHT -->
-  <div class="thought" id="thought">
-    Loading thought of the day…
   </div>
 
   <!-- KPI GRID -->
@@ -181,64 +153,50 @@ button:hover {
     <button onclick="submitHealth()">Save Health Entry</button>
   </div>
 
+  <!-- DEBUG PANEL -->
+  <div class="form-card" style="font-size:13px;color:#666;">
+    <b>Last Action:</b> <span id="lastAction">None</span><br>
+    <b>Last Commit Attempt:</b> <span id="lastCommit">Never</span>
+  </div>
+
   <script>
-/* ================= CONFIG ================= */
+const API_BASE =
+"https://script.google.com/macros/s/AKfycbw8xsP1TRYdTP7FkASoX_O4n25rt8vhaO-DhU-6GgiktTCSVzZWtkEFjrVWIjpPVuoh/exec";
 
-const API_BASE = "https://script.google.com/macros/s/AKfycbw8xsP1TRYdTP7FkASoX_O4n25rt8vhaO-DhU-6GgiktTCSVzZWtkEFjrVWIjpPVuoh/exec";
+/* DATE */
+todayDate.innerText =
+  new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
 
-/* ================= DATE ================= */
-
-document.getElementById("todayDate").innerText =
-  new Date().toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "short",
-    year: "numeric"
-  });
-
-/* ================= THOUGHT ================= */
-
-const thoughts = [
-  "Consistency beats intensity.",
-  "Small steps every day create big change.",
-  "What you repeat daily defines you.",
-  "Progress over perfection."
-];
-
-document.getElementById("thought").innerText =
-  thoughts[Math.floor(Math.random() * thoughts.length)];
-
-/* ================= KPI FETCH ================= */
-
+/* KPI FETCH */
 fetch(API_BASE + "?sheet=KPI_Cards")
-  .then(res => res.json())
-  .then(data => renderKPIs(data.rows));
-
-function renderKPIs(rows) {
-  const grid = document.getElementById("kpiGrid");
-  grid.innerHTML = "";
-
-  rows.forEach(r => {
-    let value = r.Value;
-    if (r.Unit === "INR") value = "₹" + Math.round(value);
-    if (r.Unit === "%") value = Math.round(value * 100) + "%";
-
-    const card = document.createElement("div");
-    card.className = "kpi";
-    card.innerHTML = `
-      <div class="kpi-title">${r.Metric.replaceAll("_"," ")}</div>
-      <div class="kpi-value">${value}</div>
-      <div class="kpi-status ${r.Status.toLowerCase()}">${r.Status}</div>
-    `;
-    grid.appendChild(card);
+.then(r=>r.json())
+.then(d=>{
+  kpiGrid.innerHTML="";
+  d.rows.forEach(r=>{
+    let val=r.Value;
+    if(r.Unit==="INR") val="₹"+Math.round(val);
+    if(r.Unit==="%") val=Math.round(val*100)+"%";
+    kpiGrid.innerHTML+=`
+      <div class="kpi">
+        <div class="kpi-title">${r.Metric.replaceAll("_"," ")}</div>
+        <div class="kpi-value">${val}</div>
+        <div class="kpi-status ${r.Status.toLowerCase()}">${r.Status}</div>
+      </div>`;
   });
+});
+
+/* DEBUG */
+function updateCommitLog(msg){
+  lastAction.innerText=msg;
+  lastCommit.innerText=new Date().toLocaleString();
 }
 
-/* ================= TRANSACTION ================= */
-
-function submitTransaction() {
-  const payload = {
-    sheet: "TXN_Raw",
-    values: [
+/* TRANSACTION */
+function submitTransaction(){
+  updateCommitLog("Transaction button clicked");
+  const payload={
+    sheet:"TXN_Raw",
+    values:[
       txnDate.value,
       txnAccount.value,
       txnType.value,
@@ -249,27 +207,22 @@ function submitTransaction() {
     ]
   };
 
-  fetch(API_BASE, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(payload)
-})
-.then(res => res.json())
-.then(r => {
-  alert("Transaction Saved");
-  location.reload();
-})
-.catch(err => alert("Error saving transaction"));
+  fetch(API_BASE,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  })
+  .then(r=>r.text())
+  .then(t=>updateCommitLog("Response: "+t))
+  .catch(e=>updateCommitLog("ERROR: "+e));
 }
 
-/* ================= HEALTH ================= */
-
-function submitHealth() {
-  const payload = {
-    sheet: "Health_Raw",
-    values: [
+/* HEALTH */
+function submitHealth(){
+  updateCommitLog("Health button clicked");
+  const payload={
+    sheet:"Health_Raw",
+    values:[
       healthDate.value,
       Number(healthSteps.value),
       "",
@@ -281,42 +234,32 @@ function submitHealth() {
     ]
   };
 
-  fetch(API_BASE, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(payload)
-})
-.then(res => res.json())
-.then(r => {
-  alert("Health Entry Saved");
-  location.reload();
-})
-.catch(err => alert("Error saving health entry"));
+  fetch(API_BASE,{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify(payload)
+  })
+  .then(r=>r.text())
+  .then(t=>updateCommitLog("Response: "+t))
+  .catch(e=>updateCommitLog("ERROR: "+e));
 
-  /* ================= STREAK ================= */
+  /* STREAK */
+const STREAK_KEY="dashboard_streak";
+const LAST_KEY="dashboard_last";
 
-const STREAK_KEY = "dashboard_streak";
-const LAST_KEY = "dashboard_last_visit";
+function dstr(d=new Date()){return d.toISOString().split("T")[0];}
 
-function todayStr(d=new Date()) {
-  return d.toISOString().split("T")[0];
-}
+function updateStreak(){
+  const today=dstr(),yesterday=dstr(new Date(Date.now()-86400000));
+  let s=Number(localStorage.getItem(STREAK_KEY))||0;
+  const last=localStorage.getItem(LAST_KEY);
 
-function updateStreak() {
-  const today = todayStr();
-  const yesterday = todayStr(new Date(Date.now() - 86400000));
+  if(last===yesterday) s++;
+  else if(last!==today) s=1;
 
-  let streak = Number(localStorage.getItem(STREAK_KEY)) || 0;
-  const last = localStorage.getItem(LAST_KEY);
-
-  if (last === yesterday) streak++;
-  else if (last !== today) streak = 1;
-
-  localStorage.setItem(STREAK_KEY, streak);
-  localStorage.setItem(LAST_KEY, today);
-  streakCount.innerText = streak;
+  localStorage.setItem(STREAK_KEY,s);
+  localStorage.setItem(LAST_KEY,today);
+  streakCount.innerText=s;
 }
 
 updateStreak();
