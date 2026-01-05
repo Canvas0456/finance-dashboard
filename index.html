@@ -3,19 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Personal Dashboard</title>
+<title>Personal Health & Finance Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root {
-  --bg: #f7f8fa;
+  --bg: #f6f7f9;
   --card: #ffffff;
   --text: #1c1c1e;
   --muted: #6e6e73;
+
+  --primary: #007aff;
   --good: #34c759;
   --warn: #ff9f0a;
   --alert: #ff453a;
-  --radius: 14px;
-  --shadow: 0 6px 20px rgba(0,0,0,0.06);
+
+  --radius: 16px;
+  --shadow: 0 8px 30px rgba(0,0,0,0.05);
 }
 
 * {
@@ -30,7 +35,7 @@ body {
 }
 
 .app {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
@@ -40,7 +45,6 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
 }
 
 .date {
@@ -49,24 +53,34 @@ body {
 }
 
 .streak {
-  font-size: 14px;
   background: var(--card);
   padding: 8px 14px;
   border-radius: 999px;
   box-shadow: var(--shadow);
 }
 
+/* SECTION */
+.section {
+  margin-top: 28px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
 /* KPI GRID */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 16px;
 }
 
 .kpi {
   background: var(--card);
-  border-radius: var(--radius);
   padding: 16px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
 
@@ -76,41 +90,36 @@ body {
 }
 
 .kpi-value {
-  font-size: 26px;
+  font-size: 28px;
   font-weight: 600;
 }
 
 .kpi-status {
   font-size: 12px;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .good { color: var(--good); }
 .warn { color: var(--warn); }
 .alert { color: var(--alert); }
 
-/* FORMS */
-.form-card {
+/* CHART CARDS */
+.chart-card {
   background: var(--card);
   padding: 16px;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-top: 24px;
 }
 
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-}
-
-button {
-  background: #000;
-  color: #fff;
-  border: none;
-  cursor: pointer;
+/* THOUGHT */
+.thought {
+  margin-top: 20px;
+  padding: 16px;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-style: italic;
+  color: var(--muted);
 }
 </style>
 </head>
@@ -118,151 +127,136 @@ button {
   <body>
 <div class="app">
 
+  <!-- HEADER -->
   <div class="header">
-    <div class="date" id="todayDate">—</div>
-    <div class="streak">🔥 <span id="streakCount">1</span>-day streak</div>
+    <div class="date">5 Jan 2026</div>
+    <div class="streak">🔥 7-day streak</div>
   </div>
 
-  <!-- KPI GRID -->
-  <div class="kpi-grid" id="kpiGrid"></div>
-
-  <!-- TRANSACTION FORM -->
-  <div class="form-card">
-    <h3>Add Transaction</h3>
-    <input type="date" id="txnDate">
-    <input type="text" id="txnAccount" placeholder="Account">
-    <select id="txnType">
-      <option>Income</option>
-      <option>Expense</option>
-      <option>Investment</option>
-      <option>EMI</option>
-    </select>
-    <input type="text" id="txnCategory" placeholder="Category">
-    <input type="number" id="txnAmount" placeholder="Amount">
-    <button onclick="submitTransaction()">Save Transaction</button>
+  <!-- THOUGHT -->
+  <div class="thought">
+    “Consistency beats intensity. Show up every day.”
   </div>
 
-  <!-- HEALTH FORM -->
-  <div class="form-card">
-    <h3>Daily Health Entry</h3>
-    <input type="date" id="healthDate">
-    <input type="number" id="healthSteps" placeholder="Steps">
-    <input type="number" id="healthSleep" placeholder="Sleep Hours">
-    <input type="text" id="healthWorkout" placeholder="Workout Type">
-    <input type="number" min="1" max="10" id="healthStress" placeholder="Stress (1-10)">
-    <button onclick="submitHealth()">Save Health Entry</button>
+  <!-- KPI SECTION -->
+  <div class="section">
+    <div class="section-title">Today at a Glance</div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-title">Available Balance</div>
+        <div class="kpi-value">₹24,000</div>
+        <div class="kpi-status alert">Alert</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Total Expenses (MTD)</div>
+        <div class="kpi-value">₹12,000</div>
+        <div class="kpi-status good">Good</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Budget Remaining</div>
+        <div class="kpi-value">₹8,000</div>
+        <div class="kpi-status good">Good</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Savings</div>
+        <div class="kpi-value">₹4,000</div>
+        <div class="kpi-status good">Good</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Budget Burn</div>
+        <div class="kpi-value">60%</div>
+        <div class="kpi-status warn">Warning</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Health Score</div>
+        <div class="kpi-value">84%</div>
+        <div class="kpi-status good">Good</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Activity Score</div>
+        <div class="kpi-value">75%</div>
+        <div class="kpi-status good">Good</div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-title">Avg Work Time</div>
+        <div class="kpi-value">9.5h</div>
+        <div class="kpi-status alert">Alert</div>
+      </div>
+    </div>
   </div>
 
-  <!-- DEBUG PANEL -->
-  <div class="form-card" style="font-size:13px;color:#666;">
-    <b>Last Action:</b> <span id="lastAction">None</span><br>
-    <b>Last Commit Attempt:</b> <span id="lastCommit">Never</span>
+  <!-- TRENDS -->
+  <div class="section">
+    <div class="section-title">Trends</div>
+
+    <div class="kpi-grid">
+      <div class="chart-card">
+        <canvas id="financeChart"></canvas>
+      </div>
+
+      <div class="chart-card">
+        <canvas id="healthChart"></canvas>
+      </div>
+    </div>
   </div>
 
   <script>
-const API_BASE =
-"https://script.google.com/macros/s/AKfycbw8xsP1TRYdTP7FkASoX_O4n25rt8vhaO-DhU-6GgiktTCSVzZWtkEFjrVWIjpPVuoh/exec";
-
-/* DATE */
-todayDate.innerText =
-  new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
-
-/* KPI FETCH */
-fetch(API_BASE + "?sheet=KPI_Cards")
-.then(r=>r.json())
-.then(d=>{
-  kpiGrid.innerHTML="";
-  d.rows.forEach(r=>{
-    let val=r.Value;
-    if(r.Unit==="INR") val="₹"+Math.round(val);
-    if(r.Unit==="%") val=Math.round(val*100)+"%";
-    kpiGrid.innerHTML+=`
-      <div class="kpi">
-        <div class="kpi-title">${r.Metric.replaceAll("_"," ")}</div>
-        <div class="kpi-value">${val}</div>
-        <div class="kpi-status ${r.Status.toLowerCase()}">${r.Status}</div>
-      </div>`;
-  });
+/* FINANCE TREND */
+new Chart(document.getElementById("financeChart"), {
+  type: "line",
+  data: {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May"],
+    datasets: [{
+      label: "Expenses",
+      data: [8000, 9000, 11000, 10000, 12000],
+      borderColor: "#ff453a",
+      tension: 0.4,
+      fill: false
+    },{
+      label: "Income",
+      data: [15000, 15000, 16000, 15500, 16000],
+      borderColor: "#34c759",
+      tension: 0.4,
+      fill: false
+    }]
+  },
+  options: {
+    plugins: { legend: { display: true } },
+    scales: { y: { beginAtZero: true } }
+  }
 });
 
-/* DEBUG */
-function updateCommitLog(msg){
-  lastAction.innerText=msg;
-  lastCommit.innerText=new Date().toLocaleString();
-}
-
-/* TRANSACTION */
-function submitTransaction(){
-  updateCommitLog("Transaction button clicked");
-  const payload={
-    sheet:"TXN_Raw",
-    values:[
-      txnDate.value,
-      txnAccount.value,
-      txnType.value,
-      txnCategory.value,
-      "",
-      Number(txnAmount.value),
-      ""
-    ]
-  };
-
-  fetch(API_BASE,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(payload)
-  })
-  .then(r=>r.text())
-  .then(t=>updateCommitLog("Response: "+t))
-  .catch(e=>updateCommitLog("ERROR: "+e));
-}
-
-/* HEALTH */
-function submitHealth(){
-  updateCommitLog("Health button clicked");
-  const payload={
-    sheet:"Health_Raw",
-    values:[
-      healthDate.value,
-      Number(healthSteps.value),
-      "",
-      healthWorkout.value,
-      "",
-      Number(healthSleep.value),
-      "",
-      Number(healthStress.value)
-    ]
-  };
-
-  fetch(API_BASE,{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify(payload)
-  })
-  .then(r=>r.text())
-  .then(t=>updateCommitLog("Response: "+t))
-  .catch(e=>updateCommitLog("ERROR: "+e));
-
-  /* STREAK */
-const STREAK_KEY="dashboard_streak";
-const LAST_KEY="dashboard_last";
-
-function dstr(d=new Date()){return d.toISOString().split("T")[0];}
-
-function updateStreak(){
-  const today=dstr(),yesterday=dstr(new Date(Date.now()-86400000));
-  let s=Number(localStorage.getItem(STREAK_KEY))||0;
-  const last=localStorage.getItem(LAST_KEY);
-
-  if(last===yesterday) s++;
-  else if(last!==today) s=1;
-
-  localStorage.setItem(STREAK_KEY,s);
-  localStorage.setItem(LAST_KEY,today);
-  streakCount.innerText=s;
-}
-
-updateStreak();
+/* HEALTH TREND */
+new Chart(document.getElementById("healthChart"), {
+  type: "line",
+  data: {
+    labels: ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],
+    datasets: [{
+      label: "Health Score",
+      data: [0.7,0.75,0.8,0.78,0.82,0.85,0.84],
+      borderColor: "#007aff",
+      tension: 0.4,
+      fill: false
+    }]
+  },
+  options: {
+    plugins: { legend: { display: true } },
+    scales: {
+      y: {
+        min: 0,
+        max: 1
+      }
+    }
+  }
+});
 </script>
 
 </div>
