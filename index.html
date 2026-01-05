@@ -1,316 +1,209 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Kaiwalya’s Finance Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Personal Dashboard</title>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --card: #ffffff;
+      --text: #1c1c1e;
+      --muted: #6e6e73;
 
-<style>
-:root{
-  --bg:#0f1115;
-  --card:#161a22;
-  --muted:#9aa4b2;
-  --text:#ffffff;
-  --accent:#4f7cff;
-  --green:#4cd964;
-  --red:#ff453a;
-  --glass:rgba(255,255,255,0.06);
-}
+      --good: #34c759;
+      --warn: #ff9f0a;
+      --alert: #ff453a;
 
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto;}
+      --radius: 14px;
+      --shadow: 0 6px 20px rgba(0,0,0,0.06);
+    }
 
-body{
-  margin:0;
-  background:radial-gradient(1200px 600px at top,#1b2030,var(--bg));
-  color:var(--text);
-}
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
 
-/* ===== HEADER ===== */
-header{
-  position:sticky;
-  top:0;
-  z-index:10;
-  backdrop-filter: blur(12px);
-  background:linear-gradient(180deg,rgba(15,17,21,.9),rgba(15,17,21,.6));
-  padding:16px 20px;
-  border-bottom:1px solid rgba(255,255,255,.08);
-}
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
 
-.header-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:12px;
-}
+    .app {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
 
-h1{
-  margin:0;
-  font-size:20px;
-  font-weight:600;
-}
+    /* HEADER */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-.subtitle{
-  font-size:12px;
-  color:var(--muted);
-}
+    .date {
+      font-size: 14px;
+      color: var(--muted);
+    }
 
-.date-box{
-  text-align:right;
-  font-size:12px;
-  color:var(--muted);
-}
+    .streak {
+      font-size: 14px;
+      background: var(--card);
+      padding: 8px 14px;
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+    }
 
-.period-label{
-  margin-top:4px;
-  color:var(--accent);
-  font-weight:600;
-}
+    /* THOUGHT */
+    .thought {
+      background: var(--card);
+      padding: 16px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      font-style: italic;
+      color: var(--muted);
+    }
 
-/* ===== TOGGLE ===== */
-.toggle{
-  display:flex;
-  gap:6px;
-  margin:16px auto 0;
-  width:max-content;
-  background:var(--glass);
-  border-radius:20px;
-  padding:4px;
-}
+    /* KPI GRID */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
 
-.toggle button{
-  border:none;
-  padding:6px 14px;
-  border-radius:16px;
-  background:transparent;
-  color:var(--muted);
-  cursor:pointer;
-}
+    .kpi {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s ease;
+    }
 
-.toggle button.active{
-  background:var(--accent);
-  color:#fff;
-}
+    .kpi:hover {
+      transform: translateY(-2px);
+    }
 
-/* ===== LAYOUT ===== */
-.container{
-  max-width:1100px;
-  margin:auto;
-  padding:20px;
-}
+    .kpi-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:16px;
-}
+    .kpi-value {
+      font-size: 26px;
+      font-weight: 600;
+    }
 
-/* ===== CARDS ===== */
-.card{
-  background:linear-gradient(180deg,var(--glass),rgba(255,255,255,.02));
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:16px;
-  padding:16px;
-}
+    .kpi-status {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
 
-.card h3{
-  margin:0;
-  font-size:12px;
-  color:var(--muted);
-}
+    .good { color: var(--good); }
+    .warn { color: var(--warn); }
+    .alert { color: var(--alert); }
 
-.card .value{
-  margin-top:6px;
-  font-size:22px;
-  font-weight:600;
-}
-
-/* ===== BUDGET BAR ===== */
-.budget-wrap{
-  margin-top:20px;
-}
-
-.bar{
-  height:12px;
-  border-radius:8px;
-  background:#222;
-  overflow:hidden;
-}
-
-.bar-fill{
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,var(--accent),#7aa2ff);
-  transition:width .8s ease;
-}
-
-.bar-labels{
-  display:flex;
-  justify-content:space-between;
-  margin-top:6px;
-  font-size:12px;
-  color:var(--muted);
-}
-
-/* ===== SECTIONS ===== */
-.section{
-  margin-top:30px;
-}
-
-.section h2{
-  margin:0 0 12px;
-  font-size:16px;
-}
-
-/* ===== LIST ===== */
-.list-item{
-  display:flex;
-  justify-content:space-between;
-  padding:10px 0;
-  border-bottom:1px solid rgba(255,255,255,.06);
-  font-size:13px;
-}
-
-.amount.neg{color:var(--red);}
-.amount.pos{color:var(--green);}
-
-/* ===== CANVAS ===== */
-canvas{max-height:260px;}
-</style>
+    /* FOOTER SPACE */
+    .spacer {
+      height: 40px;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="app">
 
-<header>
-  <div class="header-row">
-    <div>
-      <h1>Kaiwalya’s Finance Dashboard</h1>
-      <div class="subtitle">Clarity over cash. Control over chaos.</div>
+    <!-- HEADER -->
+    <div class="header">
+      <div class="date" id="todayDate">—</div>
+      <div class="streak">🔥 <span id="streakCount">0</span>-day streak</div>
     </div>
-    <div class="date-box">
-      <div id="todayDate"></div>
-      <div class="period-label" id="periodLabel"></div>
+
+    <!-- THOUGHT OF THE DAY -->
+    <div class="thought" id="thought">
+      Loading thought of the day…
     </div>
-  </div>
 
-  <div class="toggle">
-    <button id="btnMonth" class="active">Month</button>
-    <button id="btnYTD">YTD</button>
-  </div>
-</header>
-
-<div class="container">
-
-  <!-- KPI CARDS -->
-  <div class="grid">
-    <div class="card"><h3>Total Balance</h3><div class="value" id="kpiBalance">₹0</div></div>
-    <div class="card"><h3>Total Expenses</h3><div class="value" id="kpiExpense">₹0</div></div>
-    <div class="card"><h3>Budget Burn %</h3><div class="value" id="kpiBurn">0%</div></div>
-    <div class="card"><h3>Budget Remaining</h3><div class="value" id="kpiRemain">₹0</div></div>
-  </div>
-
-  <!-- BUDGET BAR -->
-  <div class="budget-wrap">
-    <div class="bar"><div class="bar-fill" id="budgetFill"></div></div>
-    <div class="bar-labels">
-      <span id="usedLabel">Used 0%</span>
-      <span id="remainLabel">Remaining ₹0</span>
+    <!-- KPI CARDS -->
+    <div class="kpi-grid" id="kpiGrid">
+      <!-- KPI cards injected here -->
     </div>
+
+    <div class="spacer"></div>
   </div>
 
-  <!-- TREND -->
-  <div class="section">
-    <h2>Expense Trend</h2>
-    <canvas id="trendChart"></canvas>
-  </div>
+  <script>
+    /* ===============================
+       CONFIG
+    =============================== */
 
-  <!-- CATEGORY -->
-  <div class="section">
-    <h2>Expense Categories</h2>
-    <canvas id="donutChart"></canvas>
-  </div>
+    const API_BASE = "https://script.google.com/macros/s/AKfycbw8xsP1TRYdTP7FkASoX_O4n25rt8vhaO-DhU-6GgiktTCSVzZWtkEFjrVWIjpPVuoh/exec";
+    const KPI_ENDPOINT = `${API_BASE}?sheet=KPI_Cards`;
 
-  <!-- SPENDING LIST -->
-  <div class="section">
-    <h2>Recent Spending</h2>
-    <div id="spendList"></div>
-  </div>
+    /* ===============================
+       DATE
+    =============================== */
+    document.getElementById("todayDate").innerText =
+      new Date().toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
 
-</div>
+    /* ===============================
+       KPI FETCH
+    =============================== */
+    fetch(KPI_ENDPOINT)
+      .then(res => res.json())
+      .then(data => renderKPIs(data.rows))
+      .catch(() => {
+        document.getElementById("kpiGrid").innerHTML =
+          "<p>Unable to load KPIs</p>";
+      });
 
-<script>
-const SHEET_ID = "1ApiV5dmKYycVw2IEnVKkNHY2ssLcOZZ1v1slU57UqM0";
-const BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?sheet=`;
+    function renderKPIs(rows) {
+      const grid = document.getElementById("kpiGrid");
+      grid.innerHTML = "";
 
-let mode="MONTH";
+      rows.forEach(r => {
+        const statusClass =
+          r.Status === "Good" ? "good" :
+          r.Status === "Warning" ? "warn" :
+          "alert";
 
-/* ===== DATE ===== */
-const today = new Date();
-document.getElementById("todayDate").innerText =
-  today.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+        const value =
+          r.Unit === "%" ? `${Math.round(r.Value * 100)}%` :
+          r.Unit === "INR" ? `₹${Math.round(r.Value).toLocaleString()}` :
+          r.Value;
 
-/* ===== TOGGLE ===== */
-btnMonth.onclick=()=>switchMode("MONTH");
-btnYTD.onclick=()=>switchMode("YTD");
+        const card = document.createElement("div");
+        card.className = "kpi";
+        card.innerHTML = `
+          <div class="kpi-title">${r.Metric.replace(/_/g," ")}</div>
+          <div class="kpi-value">${value}</div>
+          <div class="kpi-status ${statusClass}">${r.Status}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }
 
-function switchMode(m){
-  mode=m;
-  btnMonth.classList.toggle("active",m==="MONTH");
-  btnYTD.classList.toggle("active",m==="YTD");
-  document.getElementById("periodLabel").innerText =
-    m==="MONTH"
-    ? today.toLocaleDateString("en-US",{month:"long",year:"numeric"})
-    : "Year to Date";
-  loadAll();
-}
-
-/* ===== FETCH ===== */
-async function fetchSheet(name){
-  const res = await fetch(BASE+name);
-  const txt = await res.text();
-  return JSON.parse(txt.substring(47).slice(0,-2)).table.rows;
-}
-
-/* ===== LOAD ALL ===== */
-async function loadAll(){
-  const kpi = await fetchSheet("Dashboard_KPIs");
-  const budget = await fetchSheet("Budget_vs_Actual");
-  const txn = await fetchSheet("Txn_Clean");
-
-  /* KPIs */
-  const map={};
-  kpi.forEach(r=>map[r.c[0]?.v]=r.c[1]?.v||0);
-
-  document.getElementById("kpiBalance").innerText = "₹"+map["Total Balance (All Accounts)"];
-  document.getElementById("kpiExpense").innerText = "₹"+map["Current Month Expenses"];
-
-  const totalBudget = budget.reduce((s,r)=>s+(r.c[2]?.v||0),0);
-  const totalActual = budget.reduce((s,r)=>s+(r.c[3]?.v||0),0);
-  const burn = totalBudget?((totalActual/totalBudget)*100):0;
-
-  document.getElementById("kpiBurn").innerText = burn.toFixed(1)+"%";
-  document.getElementById("kpiRemain").innerText = "₹"+(totalBudget-totalActual);
-
-  document.getElementById("budgetFill").style.width = burn+"%";
-  document.getElementById("usedLabel").innerText = "Used "+burn.toFixed(1)+"%";
-  document.getElementById("remainLabel").innerText = "Remaining ₹"+(totalBudget-totalActual);
-
-  /* Recent Spending */
-  const list=document.getElementById("spendList");
-  list.innerHTML="";
-  txn.slice(-7).reverse().forEach(r=>{
-    list.innerHTML+=`
-      <div class="list-item">
-        <span>${r.c[5]?.v}</span>
-        <span class="amount neg">₹${Math.abs(r.c[9]?.v||0)}</span>
-      </div>`;
-  });
-}
-
-switchMode("MONTH");
-</script>
-
+    /* ===============================
+       THOUGHT OF THE DAY (TEMP)
+    =============================== */
+    const thoughts = [
+      "Small steps, repeated daily, create big change.",
+      "Consistency beats intensity.",
+      "Your future is built today.",
+      "What you do daily matters more than what you do occasionally."
+    ];
+    document.getElementById("thought").innerText =
+      thoughts[Math.floor(Math.random() * thoughts.length)];
+  </script>
 </body>
 </html>
