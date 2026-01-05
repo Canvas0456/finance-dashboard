@@ -1,209 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Personal Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personal Dashboard</title>
 
-  <style>
-    :root {
-      --bg: #f7f8fa;
-      --card: #ffffff;
-      --text: #1c1c1e;
-      --muted: #6e6e73;
+<style>
+:root {
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --text: #1c1c1e;
+  --muted: #6e6e73;
 
-      --good: #34c759;
-      --warn: #ff9f0a;
-      --alert: #ff453a;
+  --good: #34c759;
+  --warn: #ff9f0a;
+  --alert: #ff453a;
 
-      --radius: 14px;
-      --shadow: 0 6px 20px rgba(0,0,0,0.06);
-    }
+  --radius: 14px;
+  --shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
 
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+* {
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-    }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
 
-    .app {
-      max-width: 1100px;
-      margin: auto;
-      padding: 20px;
-    }
+.app {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
 
-    /* HEADER */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-    .date {
-      font-size: 14px;
-      color: var(--muted);
-    }
+.date {
+  font-size: 14px;
+  color: var(--muted);
+}
 
-    .streak {
-      font-size: 14px;
-      background: var(--card);
-      padding: 8px 14px;
-      border-radius: 999px;
-      box-shadow: var(--shadow);
-    }
+.streak {
+  font-size: 14px;
+  background: var(--card);
+  padding: 8px 14px;
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+}
 
-    /* THOUGHT */
-    .thought {
-      background: var(--card);
-      padding: 16px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-      font-style: italic;
-      color: var(--muted);
-    }
+/* THOUGHT */
+.thought {
+  background: var(--card);
+  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  font-style: italic;
+  color: var(--muted);
+}
 
-    /* KPI GRID */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 16px;
-    }
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
 
-    .kpi {
-      background: var(--card);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-      transition: transform 0.2s ease;
-    }
+.kpi {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
 
-    .kpi:hover {
-      transform: translateY(-2px);
-    }
+.kpi-title {
+  font-size: 13px;
+  color: var(--muted);
+}
 
-    .kpi-title {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
+.kpi-value {
+  font-size: 26px;
+  font-weight: 600;
+}
 
-    .kpi-value {
-      font-size: 26px;
-      font-weight: 600;
-    }
+.kpi-status {
+  font-size: 12px;
+  margin-top: 4px;
+}
 
-    .kpi-status {
-      margin-top: 6px;
-      font-size: 12px;
-      font-weight: 500;
-    }
+.good { color: var(--good); }
+.warn { color: var(--warn); }
+.alert { color: var(--alert); }
 
-    .good { color: var(--good); }
-    .warn { color: var(--warn); }
-    .alert { color: var(--alert); }
+/* FORMS */
+.form-card {
+  background: var(--card);
+  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-top: 24px;
+}
 
-    /* FOOTER SPACE */
-    .spacer {
-      height: 40px;
-    }
-  </style>
+.form-card h3 {
+  margin-top: 0;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+button {
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+</style>
 </head>
 
-<body>
-  <div class="app">
+  <body>
+<div class="app">
 
-    <!-- HEADER -->
-    <div class="header">
-      <div class="date" id="todayDate">—</div>
-      <div class="streak">🔥 <span id="streakCount">0</span>-day streak</div>
-    </div>
+  <!-- HEADER -->
+  <div class="header">
+    <div class="date" id="todayDate">—</div>
+    <div class="streak">🔥 <span id="streakCount">1</span>-day streak</div>
+  </div>
 
-    <!-- THOUGHT OF THE DAY -->
-    <div class="thought" id="thought">
-      Loading thought of the day…
-    </div>
+  <!-- THOUGHT -->
+  <div class="thought" id="thought">
+    Loading thought of the day…
+  </div>
 
-    <!-- KPI CARDS -->
-    <div class="kpi-grid" id="kpiGrid">
-      <!-- KPI cards injected here -->
-    </div>
+  <!-- KPI GRID -->
+  <div class="kpi-grid" id="kpiGrid"></div>
 
-    <div class="spacer"></div>
+  <!-- TRANSACTION FORM -->
+  <div class="form-card">
+    <h3>Add Transaction</h3>
+    <input type="date" id="txnDate">
+    <input type="text" id="txnAccount" placeholder="Account">
+    <select id="txnType">
+      <option>Income</option>
+      <option>Expense</option>
+      <option>Investment</option>
+      <option>EMI</option>
+    </select>
+    <input type="text" id="txnCategory" placeholder="Category">
+    <input type="number" id="txnAmount" placeholder="Amount">
+    <button onclick="submitTransaction()">Save Transaction</button>
+  </div>
+
+  <!-- HEALTH FORM -->
+  <div class="form-card">
+    <h3>Daily Health Entry</h3>
+    <input type="date" id="healthDate">
+    <input type="number" id="healthSteps" placeholder="Steps">
+    <input type="number" id="healthSleep" placeholder="Sleep Hours">
+    <input type="text" id="healthWorkout" placeholder="Workout Type">
+    <input type="number" min="1" max="10" id="healthStress" placeholder="Stress (1-10)">
+    <button onclick="submitHealth()">Save Health Entry</button>
   </div>
 
   <script>
-    /* ===============================
-       CONFIG
-    =============================== */
+/* ================= CONFIG ================= */
 
-    const API_BASE = "https://script.google.com/macros/s/AKfycbw8xsP1TRYdTP7FkASoX_O4n25rt8vhaO-DhU-6GgiktTCSVzZWtkEFjrVWIjpPVuoh/exec";
-    const KPI_ENDPOINT = `${API_BASE}?sheet=KPI_Cards`;
+const API_BASE = "https://script.google.com/macros/s/AKfycbw8xsP1TRYdTP7FkASoX_O4n25rt8vhaO-DhU-6GgiktTCSVzZWtkEFjrVWIjpPVuoh/exec";
 
-    /* ===============================
-       DATE
-    =============================== */
-    document.getElementById("todayDate").innerText =
-      new Date().toLocaleDateString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-      });
+/* ================= DATE ================= */
 
-    /* ===============================
-       KPI FETCH
-    =============================== */
-    fetch(KPI_ENDPOINT)
-      .then(res => res.json())
-      .then(data => renderKPIs(data.rows))
-      .catch(() => {
-        document.getElementById("kpiGrid").innerHTML =
-          "<p>Unable to load KPIs</p>";
-      });
+document.getElementById("todayDate").innerText =
+  new Date().toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
 
-    function renderKPIs(rows) {
-      const grid = document.getElementById("kpiGrid");
-      grid.innerHTML = "";
+/* ================= THOUGHT ================= */
 
-      rows.forEach(r => {
-        const statusClass =
-          r.Status === "Good" ? "good" :
-          r.Status === "Warning" ? "warn" :
-          "alert";
+const thoughts = [
+  "Consistency beats intensity.",
+  "Small steps every day create big change.",
+  "What you repeat daily defines you.",
+  "Progress over perfection."
+];
 
-        const value =
-          r.Unit === "%" ? `${Math.round(r.Value * 100)}%` :
-          r.Unit === "INR" ? `₹${Math.round(r.Value).toLocaleString()}` :
-          r.Value;
+document.getElementById("thought").innerText =
+  thoughts[Math.floor(Math.random() * thoughts.length)];
 
-        const card = document.createElement("div");
-        card.className = "kpi";
-        card.innerHTML = `
-          <div class="kpi-title">${r.Metric.replace(/_/g," ")}</div>
-          <div class="kpi-value">${value}</div>
-          <div class="kpi-status ${statusClass}">${r.Status}</div>
-        `;
-        grid.appendChild(card);
-      });
-    }
+/* ================= KPI FETCH ================= */
 
-    /* ===============================
-       THOUGHT OF THE DAY (TEMP)
-    =============================== */
-    const thoughts = [
-      "Small steps, repeated daily, create big change.",
-      "Consistency beats intensity.",
-      "Your future is built today.",
-      "What you do daily matters more than what you do occasionally."
-    ];
-    document.getElementById("thought").innerText =
-      thoughts[Math.floor(Math.random() * thoughts.length)];
-  </script>
+fetch(API_BASE + "?sheet=KPI_Cards")
+  .then(res => res.json())
+  .then(data => renderKPIs(data.rows));
+
+function renderKPIs(rows) {
+  const grid = document.getElementById("kpiGrid");
+  grid.innerHTML = "";
+
+  rows.forEach(r => {
+    let value = r.Value;
+    if (r.Unit === "INR") value = "₹" + Math.round(value);
+    if (r.Unit === "%") value = Math.round(value * 100) + "%";
+
+    const card = document.createElement("div");
+    card.className = "kpi";
+    card.innerHTML = `
+      <div class="kpi-title">${r.Metric.replaceAll("_"," ")}</div>
+      <div class="kpi-value">${value}</div>
+      <div class="kpi-status ${r.Status.toLowerCase()}">${r.Status}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+/* ================= TRANSACTION ================= */
+
+function submitTransaction() {
+  const payload = {
+    sheet: "TXN_Raw",
+    values: [
+      txnDate.value,
+      txnAccount.value,
+      txnType.value,
+      txnCategory.value,
+      "",
+      Number(txnAmount.value),
+      ""
+    ]
+  };
+
+  fetch(API_BASE, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  })
+  .then(() => alert("Transaction Saved"));
+}
+
+/* ================= HEALTH ================= */
+
+function submitHealth() {
+  const payload = {
+    sheet: "Health_Raw",
+    values: [
+      healthDate.value,
+      Number(healthSteps.value),
+      "",
+      healthWorkout.value,
+      "",
+      Number(healthSleep.value),
+      "",
+      Number(healthStress.value)
+    ]
+  };
+
+  fetch(API_BASE, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  })
+  .then(() => alert("Health Entry Saved"));
+
+  /* ================= STREAK ================= */
+
+const STREAK_KEY = "dashboard_streak";
+const LAST_KEY = "dashboard_last_visit";
+
+function todayStr(d=new Date()) {
+  return d.toISOString().split("T")[0];
+}
+
+function updateStreak() {
+  const today = todayStr();
+  const yesterday = todayStr(new Date(Date.now() - 86400000));
+
+  let streak = Number(localStorage.getItem(STREAK_KEY)) || 0;
+  const last = localStorage.getItem(LAST_KEY);
+
+  if (last === yesterday) streak++;
+  else if (last !== today) streak = 1;
+
+  localStorage.setItem(STREAK_KEY, streak);
+  localStorage.setItem(LAST_KEY, today);
+  streakCount.innerText = streak;
+}
+
+updateStreak();
+</script>
+
+</div>
 </body>
 </html>
