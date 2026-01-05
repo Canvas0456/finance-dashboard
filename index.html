@@ -250,10 +250,18 @@ function submitTransaction() {
   };
 
   fetch(API_BASE, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  })
-  .then(() => alert("Transaction Saved"));
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(payload)
+})
+.then(res => res.json())
+.then(r => {
+  alert("Transaction Saved");
+  location.reload();
+})
+.catch(err => alert("Error saving transaction"));
 }
 
 /* ================= HEALTH ================= */
@@ -274,10 +282,18 @@ function submitHealth() {
   };
 
   fetch(API_BASE, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  })
-  .then(() => alert("Health Entry Saved"));
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(payload)
+})
+.then(res => res.json())
+.then(r => {
+  alert("Health Entry Saved");
+  location.reload();
+})
+.catch(err => alert("Error saving health entry"));
 
   /* ================= STREAK ================= */
 
